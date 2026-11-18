@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Hushfolio Firestore security rules.
+// Every document lives under the owning user's UID. No cross-user reads.
+// Field types and length limits are enforced here as well as in the app,
+// so a tampered client cannot write oversized or mistyped documents.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function validPaper(data) {
+      return data.keys().hasAll(['title', 'body', 'tags'])
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
+        && data.body is string && data.body.size() >= 1 && data.body.size() <= 20000
+        && data.tags is list && data.tags.size() <= 12
+        && (!('summary' in data) || data.summary == null
+            || (data.summary is string && data.summary.size() <= 2000));
+    }
+
+    match /users/{uid}/papers/{paperId} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && validPaper(request.resource.data);
+      allow update: if isOwner(uid) && validPaper(request.resource.data);
+      allow delete: if isOwner(uid);
+    }
+
+    match /users/{uid}/ledger/{runId} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasAll(
+             ['action', 'requestedMode', 'inferenceSource', 'durationMs', 'ok'])
+        && request.resource.data.action is string
+        && request.resource.data.requestedMode is string
+        && request.resource.data.inferenceSource is string
+        && request.resource.data.durationMs is number
+        && request.resource.data.ok is bool;
+      // Ledger entries are append-only audit records: never updated or deleted.
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

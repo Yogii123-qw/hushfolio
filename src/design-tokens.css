@@ -1,0 +1,153 @@
+:root {
+  /* Hushfolio design tokens. Roles, not swatches. Every text/background
+     pair used in the app is verified by scripts/contrast-check.mjs. */
+  --ink: #16283c;
+  --ink-deep: #0f1d2b;
+  --ink-soft: #22384f;
+  --paper: #fdfcf9;
+  --paper-dim: #f4f1e8;
+  --desk: #e9e6dd;
+  --seal: #a63a2f;
+  --seal-dark: #8c2f26;
+  --slate: #44566b;
+  --slate-light: #6b7d90;
+  --line: #d8d2c4;
+  --line-strong: #b9b29e;
+  --device: #27603a;
+  --device-bg: #e4efe6;
+  --cloud: #31577d;
+  --cloud-bg: #e3ebf3;
+  --warn: #8a5a00;
+  --warn-bg: #fdf3dd;
+  --warn-line: #ecd9a8;
+  --danger: #8c2f26;
+  --danger-bg: #fbe9e6;
+  --danger-line: #eec5bf;
+  --notice-line: #c3d2e2;
+  --rail-dim: #c8d2dc;
+  --rail-line: #3a526b;
+  --pull-line: #5a7089;
+  --dot-ok: #7fb98a;
+  --dot-bad: #e0a23f;
+  --margin-rule: #d9a49e;
+  --overlay: rgb(15 29 43 / 0.55);
+
+  --font-serif: "Charter", "Bitstream Charter", Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --rail-width: 232px;
+  --content-max: 860px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Browser surfaces, themed from the palette. */
+::selection {
+  background: var(--seal);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+textarea {
+  caret-color: var(--seal);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: var(--cloud);
+  text-underline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 6px;
+  border: 2px solid var(--desk);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
