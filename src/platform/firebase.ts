@@ -9,6 +9,7 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 import { getRemoteConfig, type RemoteConfig } from "firebase/remote-config";
 import { AppError } from "../errors";
 import { logInfo } from "./logging";
+import { initAppCheckForApp, type AppCheckOptions, type AppCheckStatus } from "./appcheck";
 
 export interface FirebaseEnvConfig {
   apiKey: string;
@@ -68,6 +69,7 @@ export interface FirebaseServices {
   ai: AI;
   remoteConfig: RemoteConfig;
   projectId: string;
+  appCheck: AppCheckStatus;
 }
 
 let cachedServices: FirebaseServices | null = null;
@@ -75,10 +77,20 @@ let cachedServices: FirebaseServices | null = null;
 /**
  * Initialize (once) the Firebase app and its services. The Gemini Developer
  * API backend is used for AI Logic, per the official get-started guide:
- * it lets the app start at no cost. App Check must be initialized by the
- * caller BEFORE this function is used for AI calls; see appcheck.ts.
+ * it lets the app start at no cost.
+ *
+ * ORDER MATTERS: App Check is initialized here, BEFORE getAI() is called.
+ * @firebase/ai captures the App Check instance once, at getAI() time
+ * (provider.getImmediate({ optional: true })); if App Check is not
+ * initialized yet it caches null and never re-resolves, so AI requests go
+ * out with no X-Firebase-AppCheck header at all and the server answers
+ * 401 "Firebase App Check token is invalid" even though a valid token
+ * exists. Initializing App Check first is the fix; Auth resolves App Check
+ * lazily per call, which is why Auth could still get tokens while AI could
+ * not. (Diagnosed live 19 Nov 2026: exchange returned 200 with a token,
+ * yet the Vertex AI request carried no App Check header.)
  */
-export function initServices(config: FirebaseEnvConfig): FirebaseServices {
+export function initServices(config: FirebaseEnvConfig, appCheckOptions: AppCheckOptions): FirebaseServices {
   if (cachedServices !== null && cachedServices.projectId === config.projectId) {
     return cachedServices;
   }
@@ -100,6 +112,8 @@ export function initServices(config: FirebaseEnvConfig): FirebaseServices {
       "Reload the page with a single consistent .env configuration.",
     );
   }
+  // App Check BEFORE getAI() — see the ORDER MATTERS note above.
+  const appCheck = initAppCheckForApp(app, appCheckOptions);
   const services: FirebaseServices = {
     app,
     auth: getAuth(app),
@@ -107,6 +121,7 @@ export function initServices(config: FirebaseEnvConfig): FirebaseServices {
     ai: getAI(app, { backend: new GoogleAIBackend() }),
     remoteConfig: getRemoteConfig(app),
     projectId: config.projectId,
+    appCheck,
   };
   cachedServices = services;
   logInfo("firebase_initialized", { projectId: config.projectId });

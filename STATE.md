@@ -1,7 +1,7 @@
 # Hushfolio — STATE
 
-## Current phase: Firebase gate done, live verification in progress
-Updated 19 Nov 2026 ~16:00 WIB.
+## Current phase: Live verification done, Apa Adanya ($0) chosen, pushing fixes
+Updated 19 Nov 2026 ~17:45 WIB.
 
 ## Done
 - Build complete (19 Nov 00:56 WIB): 159/159 tests, production build
@@ -24,6 +24,33 @@ Updated 19 Nov 2026 ~16:00 WIB.
   `src/platform/appcheck.ts` (plus honest label updates in StatusView,
   SetupView, `.env.example`). Typecheck clean, tests still 159/159,
   build passes.
+- Timestamp crash fixed + verified live (19 Nov 16:0x WIB):
+  `timestampToMillis` called `value.toMillis` detached from `this`,
+  which crashed every paper read. Now calls it as a method; 2
+  regression tests added (real Firestore Timestamp + prototype method
+  reading `this`). Tests 161/161, build passes, live paper create /
+  open / delete verified with 0 errors.
+- App Check 401 root cause found + fixed (19 Nov 17:20 WIB): packet
+  capture proved the app never sent an App Check token at all, because
+  `getAI()` ran before `initializeAppCheck()` and @firebase/ai caches
+  the App Check instance once at construction. Fix: App Check is now
+  initialized inside `initServices` BEFORE `getAI()` (firebase.ts +
+  App.tsx). Live re-test 24/27, Summarize returned HTTP 200 with a
+  Cloud ledger entry. `127.0.0.1` cannot mint tokens (not in the key
+  allowlist); `localhost` can. Live scripts test from localhost.
+- Gemini free-tier 403 gate (19 Nov 17:23-17:35 WIB): every cloud call
+  after the one Summarize success returns HTTP 403 "The Gemini API free
+  tier is not available for this project. To use the Gemini API, please
+  set up billing." Proven stable across 3 models, both endpoints, and
+  a 70 s gap. No $0 path exists; billing is the only way to lift it.
+  Owner chose Apa Adanya ($0, no billing) 19 Nov 17:38 WIB.
+- Friendly free-tier message + README note (19 Nov 17:39-17:41 WIB):
+  `toAppError` maps the 403 to a plain Blaze billing message (branch
+  placed before the network branch, which the SDK's "Error fetching"
+  text would otherwise trigger). Live Firefox probe confirmed the
+  exact panel text on a real 403. README documents the Spark free-tier
+  deployment and the Blaze requirement for Cloud Vertex AI. Tests
+  162/162, build (tsc + vite) passes, Groq final review: APPROVE.
 
 ## Advisor consultations (SOP protocol)
 - 19 Nov ~15:45 WIB, Groq gpt-oss-120b: "Will ReCaptchaV3Provider work
@@ -39,23 +66,29 @@ Updated 19 Nov 2026 ~16:00 WIB.
   local key verification). One Groq suggestion REJECTED with evidence:
   enable Vertex AI (Hushfolio uses the Gemini Developer API backend;
   Vertex AI is unnecessary).
+- 19 Nov 17:2x WIB, Groq gpt-oss-120b: confirmed the App Check
+  init-order mechanism exactly (getAI captures the App Check instance
+  once; fix is to initialize App Check before getAI()).
+- 19 Nov 17:35 WIB, Groq gpt-oss-120b: agreed there is no $0 path past
+  the 403 free-tier gate; billing is the only documented way to lift
+  it; the single earlier 200 was a one-off window.
+- 19 Nov 17:41 WIB, Groq gpt-oss-120b: final pre-push review of the
+  complete diff (timestamp fix, init-order fix, friendly 403 message,
+  README note, tests). Verdict: APPROVE. Two review questions settled
+  by evidence first: `appCheck` in App.tsx is used (boot state), and
+  `initServices` has a single caller.
 
 ## In progress
-- Live verification (5 AI actions + Firestore/Auth/App Check/Remote
-  Config round-trips) — moved to the "Uji Hushfolio" test chat
-  (chat_id 97698506-ccf3-4f04-8434-1027127469f9) at the owner's order
-  (19 Nov 15:55 WIB: test the first project in another chat, so no
-  judge hits a bug). Blocker found 19 Nov ~15:50 WIB: headless
-  Chromium on this VM cannot reach Google APIs (egress-proxy tunnel
-  failure, ERR_TUNNEL_CONNECTION_FAILED; curl through the same proxy
-  works; direct connection fails; Firefox NOT installed). The test
-  chat tries a Firefox install first, then REST-API verification.
-  Live-verification script: scripts/live-verification.py (stops at
-  sign-in until a working browser path exists).
+- Pushing the fixes (owner ordered 19 Nov 17:38 WIB, Apa Adanya).
+  Commit includes: timestamp fix, App Check init-order fix, friendly
+  403 message + test, README free-tier note, live-verification
+  Firefox script (scripts/live-verification-firefox.py, no secrets).
+  Full audit: ~/workspace/hackathons/pt11/audit-buildhybridai/
+  LIVE-VERIFICATION-2026-11-19.md.
 
 ## Remaining owner gates
-- Demo video ≤ 3 min, public YouTube (only after live verification).
+- Demo video ≤ 3 min, public YouTube (after this push).
 - Hosting decision (owner).
 - Devpost submit before Tue 1 Dec 2026 05:00 WIB.
-- Local commits after the 07:09 WIB push are not yet pushed; a push
-  needs the owner's word.
+- Cloud AI stays off on the Spark plan: cloud actions fail with the
+  friendly Blaze message until the owner enables billing.

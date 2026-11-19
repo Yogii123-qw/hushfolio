@@ -40,6 +40,14 @@ or outputs.
   every value validated, invalid values fall back to defaults and are
   reported in the Status view).
 
+**Free-tier note.** This deployment runs on the Firebase Spark plan (free,
+no card): the core features, the ledger, App Check, and the on-device
+Gemini Nano path all run in full. The Cloud Vertex AI fallback is the only
+part that needs an upgrade. When the project has no billing attached,
+cloud actions fail with a clear message saying a Blaze plan is required,
+and nothing is retried silently or misreported as a bug. To turn cloud AI
+on, upgrade the project to the Blaze plan in the Firebase console.
+
 ## Setup
 
 You need your own Firebase project. The app has no demo mode: without

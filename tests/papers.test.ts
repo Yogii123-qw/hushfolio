@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { DocumentData, DocumentSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import { paperFromDoc } from "../src/data/papers";
 
 function fakeSnapshot(
@@ -94,5 +95,42 @@ describe("paperFromDoc", () => {
     const paper = paperFromDoc(fakeSnapshot("p1", { title: "T", body: "B", tags: [], createdAt: 1234 }));
     expect(paper?.createdAt).toBe(1234);
     expect(paper?.updatedAt).toBe(0);
+  });
+
+  it("reads real Firestore Timestamps (toMillis needs its receiver)", () => {
+    const paper = paperFromDoc(
+      fakeSnapshot("p1", {
+        title: "T",
+        body: "B",
+        tags: [],
+        createdAt: Timestamp.fromMillis(1000),
+        updatedAt: Timestamp.fromMillis(2000),
+      }),
+    );
+    expect(paper?.createdAt).toBe(1000);
+    expect(paper?.updatedAt).toBe(2000);
+  });
+
+  it("reads prototype-method timestamps that read `this`", () => {
+    class ThisTimestamp {
+      constructor(
+        private readonly seconds: number,
+        private readonly nanoseconds: number,
+      ) {}
+      toMillis(): number {
+        return this.seconds * 1000 + Math.floor(this.nanoseconds / 1e6);
+      }
+    }
+    const paper = paperFromDoc(
+      fakeSnapshot("p1", {
+        title: "T",
+        body: "B",
+        tags: [],
+        createdAt: new ThisTimestamp(1, 500_000),
+        updatedAt: new ThisTimestamp(2, 0),
+      }),
+    );
+    expect(paper?.createdAt).toBe(1000);
+    expect(paper?.updatedAt).toBe(2000);
   });
 });

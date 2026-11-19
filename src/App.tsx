@@ -7,7 +7,7 @@ import { ErrorPanel } from "./components/feedback";
 import { SealIcon } from "./components/icons";
 import { recordLedgerRun } from "./data/ledger";
 import { AppError, toAppError } from "./errors";
-import { initAppCheckForApp, readAppCheckOptions, type AppCheckStatus } from "./platform/appcheck";
+import { readAppCheckOptions, type AppCheckStatus } from "./platform/appcheck";
 import { signInAnonymouslyFlow, signInWithGoogleFlow, watchAuth } from "./platform/auth";
 import { probeDeviceModel } from "./platform/deviceModel";
 import { initServices, readBrowserEnvConfig, type FirebaseServices } from "./platform/firebase";
@@ -118,11 +118,13 @@ export function App(): JSX.Element {
         return;
       }
       try {
-        const services = initServices(envResult.config);
-        const appCheck = initAppCheckForApp(
-          services.app,
+        // App Check is initialized inside initServices, BEFORE getAI() —
+        // see the ORDER MATTERS note in src/platform/firebase.ts.
+        const services = initServices(
+          envResult.config,
           readAppCheckOptions(import.meta.env as unknown as Record<string, string | undefined>),
         );
+        const appCheck = services.appCheck;
         const loaded = await loadRemoteConfigValues(services.remoteConfig);
         const probe = await probeDeviceModel();
         if (!mountedRef.current) return;

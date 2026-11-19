@@ -70,6 +70,26 @@ export function toAppError(error: unknown, context: string): AppError {
       code,
     );
   }
+  // Free-tier billing gate (must sit before the network branch below: the
+  // Firebase AI SDK reports it as "Error fetching from ...", which the
+  // network matcher would otherwise swallow as a connection failure).
+  // Verified live 19 Nov 2026: HTTP 403 "The Gemini API free tier is not
+  // available for this project. To use the Gemini API, please set up
+  // billing to upgrade to the paid tier." This is a plan gate, not a bug
+  // and not a transient quota, so the message says so plainly.
+  if (
+    haystack.includes("free tier is not available") ||
+    haystack.includes("free tier not available") ||
+    haystack.includes("set up billing") ||
+    haystack.includes("upgrade to the paid tier")
+  ) {
+    return new AppError(
+      "quota",
+      `${context}: Cloud AI needs an active Firebase Blaze billing plan. The free tier is not available for this project, so cloud actions are off.${suffix}`,
+      "Your papers stay private on this device. On-device actions keep working where the device model is available. To turn cloud AI on, upgrade the project to the Blaze plan in the Firebase console.",
+      code,
+    );
+  }
   if (
     haystack.includes("resource-exhausted") ||
     haystack.includes("quota") ||

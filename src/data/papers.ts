@@ -40,7 +40,11 @@ function timestampToMillis(value: unknown): number {
   if (typeof value === "object" && value !== null && "toMillis" in value) {
     const toMillis = (value as { toMillis?: unknown }).toMillis;
     if (typeof toMillis === "function") {
-      const result = (toMillis as () => unknown)();
+      // Call it as a method of `value`, never detached: the real Firestore
+      // Timestamp.toMillis reads `this.seconds`, so `const f = ts.toMillis;
+      // f()` throws "cannot read properties of undefined (reading 'seconds')"
+      // and breaks every paper read (live bug, 19 Nov 2026).
+      const result = (value as { toMillis(): unknown }).toMillis();
       if (typeof result === "number") {
         return result;
       }
