@@ -45,7 +45,7 @@ instructions; with one, every AI call is a real Firebase AI Logic call.
 |---|---|
 | Gen AI app using Firebase AI Logic + supporting Firebase products | `src/ai/hybrid.ts` calls `getGenerativeModel` with `HybridParams` at runtime; `src/ai/actions.ts` calls `generateContent` / `generateContentStream`; App Check (`src/platform/appcheck.ts`), Auth, Firestore, Remote Config all integrated. |
 | At least 1 platform (Web Chrome) | Web app, Chrome Desktop 139+ for on-device inference. |
-| Public open-source-licensed repo | Apache-2.0 `LICENSE` present. Repo is local-only until the owner pushes it public. |
+| Public open-source-licensed repo | Apache-2.0 `LICENSE` present. Repo is public on GitHub since 19 Nov 2026. |
 | Firebase AI Logic actually called at runtime, not just named | `generateContent` / `generateContentStream` / `initializeDeviceModel` call sites in `src/ai/`; no canned responses in `src/`. |
 | Text description | This draft + `README.md`. |
 | Demo video ≤ 3 minutes, public YouTube, English/subtitled | NOT YET MADE, owner gate. |
@@ -101,12 +101,11 @@ owner (or with the owner's project) before the demo video is recorded.
 5. **Hosting (optional but strongly encouraged)**: deploy the production
    build to a public URL.
 6. **Devpost account + submission**: submit before Tue 1 Dec 2026 05:00
-   WIB (Mon 30 Nov 2026 22:00 UTC). NOTE (per parent coordination notes,
-   19 Nov 2026): the owner's Devpost account was suspended (flagged as
+   WIB (Mon 30 Nov 2026 22:00 UTC). NOTE (19 Nov 2026): the owner's Devpost account was suspended (flagged as
    automated, under review); an appeal email was sent 00:39 WIB 19 Nov and
-   a reply watch is active. Do NOT create a new account (ban + 
-   disqualification risk). Submission is blocked until the account is
-   restored.
+   Devpost Support removed the flag the same morning. The account was
+   confirmed restored 10:12 WIB 19 Nov, so submission is unblocked.
+   Do NOT create a new account (ban + disqualification risk).
 7. **If the entry wins**: return the Required Forms within 10 business
    days; non-US winners must provide IRS Form W-8BEN; prizes are paid
    within 60 days of completed forms, net of withholding.
