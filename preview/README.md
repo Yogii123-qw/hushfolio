@@ -1,4 +1,4 @@
-# Preview harness (DEV ONLY — not part of the shipped app)
+# Preview harness (DEV ONLY, not part of the shipped app)
 
 This directory exists for ONE purpose: visual review of the authenticated
 views (papers list, paper sheet + AI panel, ledger, status, settings)

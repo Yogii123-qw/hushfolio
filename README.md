@@ -1,4 +1,4 @@
-# Hushfolio — Private papers, sealed on your device
+# Hushfolio: Private papers, sealed on your device
 
 A private papers archive (journal entries, notes, letter drafts) whose
 privacy is guaranteed by its hybrid inference architecture, not by a
@@ -6,28 +6,28 @@ promise. Built for the **#BuildHybridAI 2026** hackathon (Google/Firebase,
 Devpost).
 
 Sensitive scans run **only on the device**. Everything else prefers the
-device and uses the cloud only when the on-device model is not ready —
+device and uses the cloud only when the on-device model is not ready,
 and every run is recorded in a ledger that shows exactly where it ran.
 
 ## The five AI actions
 
 | Action | Inference mode | What it does |
 |---|---|---|
-| Seal Scan | `only_on_device` | Finds sensitive details (names, addresses, IDs, financial, health, credentials) and shows a redacted preview with values replaced, never copied. Refuses honestly when the on-device model is not ready — it never silently falls back to the cloud. |
+| Seal Scan | `only_on_device` | Finds sensitive details (names, addresses, IDs, financial, health, credentials) and shows a redacted preview with values replaced, never copied. Refuses honestly when the on-device model is not ready. It never silently falls back to the cloud. |
 | Summarize & file | `prefer_on_device` | Structured JSON: title, summary, tags, mood. Saved only when you approve. |
 | Ask this paper | `prefer_on_device`, streaming | Single-turn Q&A over one paper. Answers only from that paper; refuses to invent. |
 | Photo read | `prefer_on_device`, multimodal | Reads a JPEG/PNG photo of a paper document. Warns before running if cloud fallback could send the photo. Photo bytes stay in the browser tab; only extracted text and photo details are saved. |
 | Connect the dots | `prefer_in_cloud`, explicit consent | Themes, connections, and a timeline across 2–8 papers. A consent modal explains that content leaves the device. Disabled in Strict mode. Offline, it falls back to the on-device model per documented SDK semantics, and the result is labeled with its actual source. |
 
 **Strict mode** (Settings) forces `only_on_device` for every action and
-disables Connect the dots. **The ledger** records metadata only — action,
-requested mode, actual `inferenceSource`, duration, outcome — never prompts
+disables Connect the dots. **The ledger** records metadata only, action,
+requested mode, actual `inferenceSource`, duration, outcome, never prompts
 or outputs.
 
 ## Firebase services used (all real, all at runtime)
 
 - **Firebase AI Logic** (Gemini Developer API backend): hybrid inference
-  via `getGenerativeModel` with `HybridParams` — Gemini Nano on-device
+  via `getGenerativeModel` with `HybridParams`, Gemini Nano on-device
   plus `gemini-3.5-flash-lite` in the cloud. Structured output on both
   paths (cloud `responseSchema`, on-device `responseConstraint`),
   streaming, and multimodal input.
@@ -36,7 +36,7 @@ or outputs.
 - **Authentication** (anonymous by default, optional Google sign-in).
 - **Firestore** (papers + append-only ledger, owner-only security rules
   in `firestore.rules`).
-- **Remote Config** (routing policy, limits, cloud model, prompt version —
+- **Remote Config** (routing policy, limits, cloud model, prompt version,
   every value validated, invalid values fall back to defaults and are
   reported in the Status view).
 
@@ -83,15 +83,15 @@ Status view (started only by your click, with progress).
 
 Verification tooling (see `scripts/`):
 
-- `scripts/headless-walkthrough.py` — Playwright: unconfigured build
+- `scripts/headless-walkthrough.py`, Playwright: unconfigured build
   renders SetupView on desktop + mobile with zero console errors, and a
   dummy-config build reaches SignInView and fails sign-in honestly.
   Requires the Playwright venv + a `dist-dummy/` build (see the script
   header).
-- `scripts/preview-walkthrough.py` — Playwright against the dev-only
+- `scripts/preview-walkthrough.py`, Playwright against the dev-only
   preview harness (`preview/`, fixture data, separate Vite config) for
   visual review of the authenticated views.
-- `scripts/contrast-check.mjs` — the contrast check above.
+- `scripts/contrast-check.mjs`: the contrast check above.
 
 ## Project structure
 
