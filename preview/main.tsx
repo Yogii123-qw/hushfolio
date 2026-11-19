@@ -14,7 +14,7 @@ import "../src/design-tokens.css";
 import "../src/styles.css";
 import { FIXTURE_PAPERS } from "./fixtures/data";
 
-// PREVIEW HARNESS — dev-only visual review shell. Fixture data, fake
+// PREVIEW HARNESS - dev-only visual review shell. Fixture data, fake
 // services, no Firebase. Never part of the shipped app bundle.
 
 const fakeServices = {
@@ -86,7 +86,7 @@ function Harness() {
           alignItems: "center",
         }}
       >
-        <strong>PREVIEW HARNESS — fixture data for visual review only. Not the shipped app.</strong>
+        <strong>PREVIEW HARNESS - fixture data for visual review only. Not the shipped app.</strong>
         <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
           <input type="checkbox" checked={strictMode} onChange={(e) => setStrictMode(e.target.checked)} />
           Strict mode

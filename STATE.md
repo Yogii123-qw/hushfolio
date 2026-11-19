@@ -1,4 +1,4 @@
-# Hushfolio — STATE
+# Hushfolio - STATE
 
 ## Current phase: Real encryption done (item 2 of 3 $0 improvements), Firestore rules deploy + live verification next
 Updated 19 Nov 2026 ~18:40 WIB.
@@ -82,7 +82,7 @@ Updated 19 Nov 2026 ~18:40 WIB.
   papers), build passes, Groq final review: APPROVE (after fixing a
   REJECT: rules now encrypted-only, legacy fields forbidden beside the
   blob, mixed-doc migration no longer overwrites the blob). Firestore
-  rules updated in the repo (firestore.rules) — MUST be published via
+  rules updated in the repo (firestore.rules) - MUST be published via
   the console before live verification, or encrypted writes fail.
   Blueprint: audit-buildhybridai/ENCRYPTION-BLUEPRINT.md. Known gap:
   changing the passphrase is not supported yet (Settings says so).
@@ -94,7 +94,7 @@ Updated 19 Nov 2026 ~18:40 WIB.
   use ReCaptchaEnterpriseProvider; classic v3 tokens are not accepted
   for an Enterprise-registered app. Own conclusion agreed (option a);
   no conflict. Decision taken with that evidence.
-- 19 Nov ~17:52 WIB, Groq gpt-oss-120b: "403 free tier not available — known causes and any $0 fix?" Conclusion: most likely cause is no billing account attached (Spark project has no billing relationship; free tier is billing-enabled free quota); project-level, so a fresh Spark project under the same account will hit the same 403; only fix is attaching a billing account (even trial credit), staying in free quota costs $0 but needs a card. Own conclusion: backend already GoogleAIBackend (verified in src/platform/firebase.ts), so the backend-misconfiguration hypothesis is dead; Groq's billing-account explanation is consistent with the observed 403. No conflict. Decision: present $0 menu to Monch (GitHub Pages hosting, fresh-project test as long shot, WebCrypto encryption as new feature).
+- 19 Nov ~17:52 WIB, Groq gpt-oss-120b: "403 free tier not available - known causes and any $0 fix?" Conclusion: most likely cause is no billing account attached (Spark project has no billing relationship; free tier is billing-enabled free quota); project-level, so a fresh Spark project under the same account will hit the same 403; only fix is attaching a billing account (even trial credit), staying in free quota costs $0 but needs a card. Own conclusion: backend already GoogleAIBackend (verified in src/platform/firebase.ts), so the backend-misconfiguration hypothesis is dead; Groq's billing-account explanation is consistent with the observed 403. No conflict. Decision: present $0 menu to Monch (GitHub Pages hosting, fresh-project test as long shot, WebCrypto encryption as new feature).
 - Direct-API check 19 Nov 17:58 WIB (curl, key read from .env into a shell variable, never printed): generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent → HTTP 403 PERMISSION_DENIED / ACCESS_DENIED. The block is NOT Firebase-AI-Logic-specific; it is project/key-level. Fresh-project odds now lower. Ranking confirmed by both Groq and this test: hosting (A) > encryption (C) > fresh project (B).
 - 19 Nov 17:2x WIB, Groq gpt-oss-120b: confirmed the App Check
   init-order mechanism exactly (getAI captures the App Check instance
@@ -113,7 +113,7 @@ Updated 19 Nov 2026 ~18:40 WIB.
   /hushfolio/*, no react-router, no absolute paths in src/, dist
   gitignored, tests 162/162, no secrets in the diff.
 - 19 Nov ~18:25 WIB, Groq gpt-oss-120b (3 calls, blueprint): encryption
-  design — src/crypto.ts (PBKDF2 200k, AES-GCM, v1 blob), data-layer
+  design - src/crypto.ts (PBKDF2 200k, AES-GCM, v1 blob), data-layer
   hooks (blob holds title/body/tags/summary/sensitivity/mood; plaintext
   createdAt/updatedAt/photo metadata), salt + check in users/{uid},
   mandatory passphrase setup/unlock, lazy migration, honest failure
@@ -123,11 +123,11 @@ Updated 19 Nov 2026 ~18:40 WIB.
   (encrypting only the patch would drop the other fields).
 - 19 Nov ~18:33 WIB, Groq gpt-oss-120b (2 calls, final review):
   Review 1 (crypto core): APPROVE, 5 minor findings (base64 concat
-  O(n²) — fixed with array+join; empty-string decode edge — already
-  caught by length checks; key zeroisation — impossible for opaque
-  WebCrypto handles; known-plaintext check value — the GCM tag is the
+  O(n²) - fixed with array+join; empty-string decode edge - already
+  caught by length checks; key zeroisation - impossible for opaque
+  WebCrypto handles; known-plaintext check value - the GCM tag is the
   oracle either way, PBKDF2 + passphrase strength is the mitigation).
-  Review 2 (data layer + rules): REJECT — rules still allowed plaintext
+  Review 2 (data layer + rules): REJECT - rules still allowed plaintext
   writes (validPaper OR branch) and did not forbid legacy fields beside
   the blob; migration silently skipped malformed docs; isLegacyDoc
   masked mixed docs. All fixed (rules encrypted-only + legacy fields
@@ -137,15 +137,43 @@ Updated 19 Nov 2026 ~18:40 WIB.
   APPROVE.
 
 ## In progress
-- Item 2 close-out (owner order 18:10 WIB): publish the new Firestore
-  rules via the console (browser task, brunosrna44@gmail.com), then
-  redeploy gh-pages with the new build, then live-verify encryption
-  from the Pages origin (passphrase setup → create → Firestore doc has
-  only encryptedBlob → reload + unlock → readable → wrong passphrase
-  rejected → legacy plaintext paper migrates on read). Deploy order
-  matters: rules first (old rules reject encrypted writes), gh-pages
-  immediately after (new rules reject the old build's plaintext writes;
-  reads keep working either way).
+- Reporting route (Monch order 18:31 WIB 19 Nov): Hushfolio results go
+  to Bos in the Uji Hushfolio chat ONLY; never via the PT.11 chat (PT.11
+  focuses on Concordium). Hosting already accepted by Bos.
+- Item 2 DONE 19:03 WIB 19 Nov: rules published 18:32, gh-pages
+  redeployed (6a157a4, build dffccc2), live verification 23/23 from the
+  Pages origin, network audit 4/4 (passphrase in 0 of 58 requests),
+  database sterilized (69 real docs deleted, collections confirmed
+  empty). Audit doc §10 written. Reported to Bos in this chat.
+- Item 3 CLOSED at stage 1 (Monch order 19:28 WIB 19 Nov): new project
+  `hushfolio-free-tier-test` got HTTP 403 on both models even after a
+  4-minute propagation wait; stage 2 never run. Test project DELETED
+  19:29 WIB (console: "Project has been deleted"; project list shows
+  only hushfolio-133fb; restorable via Cloud console undelete).
+- FINAL BUILD DECLARED (Monch order 19:28 WIB): the live build at
+  https://yogii123-qw.github.io/hushfolio/ (dffccc2 / gh-pages 6a157a4)
+  is the final build.
+- Submission description draft DONE (SUBMISSION-DESCRIPTION.md in the
+  audit folder) and pasted to Bos in this chat 19:31 WIB.
+- VIDEO DONE 19:34 WIB (Monch order 19:28 WIB: record as-is): v3,
+  129.7 s, H.264 1280x800 30 fps, recorded from the LIVE hosting URL,
+  passphrase setup included, Blaze panel fully readable (fixes the v1
+  defects: late captions + never-visible panels). Verified frame by
+  frame (8 midpoints + 2 confirmation frames); SHOT-LOG.md written.
+  Demo user doc deleted 19:36 WIB (recursive delete, /users confirmed
+  empty again); file delivered to Bos in this chat.
+- SUBMITTED 20:22 WIB 19 Nov: Devpost BuildHybridAI 2026, ID 1312273,
+  https://devpost.com/software/hushfolio, status SUBMITTED, page live
+  (Published 19 Nov 08:18 EST, verified independently: title, tagline,
+  full description, demo link, repo link, YouTube embed all correct).
+  Editable until 30 Nov 17:00 EST (= 1 Dec 05:00 WIB). Gallery not yet
+  published by the event managers (their setting, not a submission
+  problem). No payment, no other project touched.
+- Deskripsi Devpost diperbaiki 20:31 WIB (versi bersih tanpa strip
+  panjang, terverifikasi di halaman publik, bidang lain utuh).
+- Perbaikan judul + deskripsi + tag video YouTube (pzff5kdGw2o) SELESAI
+  20:34 WIB (akun Google Bruno Srna, terverifikasi di halaman publik,
+  nol strip panjang, video tetap Publik).
 - Item 3: fresh Firebase project test (staged; stop at stage 1 if 403).
 - Demo video on HOLD until all three items are done (video must be
   recorded from the final build, and the script gains a passphrase step).

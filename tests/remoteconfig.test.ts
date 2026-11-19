@@ -45,7 +45,7 @@ describe("parseRemoteConfigValues", () => {
     expect(invalidKeys).toEqual(expect.arrayContaining(["strict_mode_default", "cloud_enabled"]));
   });
 
-  it("enforces max_paper_chars bounds 1000–50000", () => {
+  it("enforces max_paper_chars bounds 1000-50000", () => {
     expect(parseRemoteConfigValues({ max_paper_chars: 1000 }).invalidKeys).toEqual([]);
     expect(parseRemoteConfigValues({ max_paper_chars: 50000 }).invalidKeys).toEqual([]);
     expect(parseRemoteConfigValues({ max_paper_chars: 999 }).invalidKeys).toEqual(["max_paper_chars"]);
@@ -53,7 +53,7 @@ describe("parseRemoteConfigValues", () => {
     expect(parseRemoteConfigValues({ max_paper_chars: 1234.9 }).values.maxPaperChars).toBe(1234);
   });
 
-  it("enforces page_size bounds 5–50", () => {
+  it("enforces page_size bounds 5-50", () => {
     expect(parseRemoteConfigValues({ page_size: 5 }).invalidKeys).toEqual([]);
     expect(parseRemoteConfigValues({ page_size: 50 }).invalidKeys).toEqual([]);
     expect(parseRemoteConfigValues({ page_size: 4 }).invalidKeys).toEqual(["page_size"]);

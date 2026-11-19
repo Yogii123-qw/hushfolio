@@ -137,7 +137,7 @@ export type PhotoResult = z.infer<typeof photoZodSchema>;
 
 /**
  * Parse model text output as JSON and validate it. Failures are reported
- * with field paths and issue codes only — never with received values, so
+ * with field paths and issue codes only - never with received values, so
  * model output (which may contain user content) is never echoed into logs
  * or error surfaces.
  */

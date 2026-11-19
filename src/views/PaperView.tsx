@@ -237,7 +237,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
 
   const savePhotoOutcome = async (): Promise<void> => {
     if (paper === null || isLockedPaper(paper) || photoResult === null || photoFile === null) return;
-    const appendedBody = `${paper.body}\n\n[Photo transcription — ${photoFile.name}]\n${photoResult.data.transcription}`;
+    const appendedBody = `${paper.body}\n\n[Photo transcription - ${photoFile.name}]\n${photoResult.data.transcription}`;
     try {
       await updatePaper(
         services.db,
@@ -510,7 +510,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
             <SourcePill source={summaryResult !== null ? summaryResult.meta.source : "none"} />
           </div>
           <p className="ai-action-desc">
-            {modeExplanation("prefer_on_device")} A title, a short summary, tags, and a mood — saved
+            {modeExplanation("prefer_on_device")} A title, a short summary, tags, and a mood - saved
             only when you approve.
           </p>
           <div className="ai-action-controls">
@@ -559,7 +559,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
           </div>
           <p className="ai-action-desc">
             {modeExplanation("prefer_on_device")} The answer is drawn only from this paper, and it
-            streams in as it is written. Each question is a fresh, single question — there is no
+            streams in as it is written. Each question is a fresh, single question - there is no
             conversation memory.
           </p>
           <div className="field" style={{ marginTop: 12 }}>

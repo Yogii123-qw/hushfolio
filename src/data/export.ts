@@ -1,5 +1,5 @@
 // Export: papers out, as JSON or Markdown. Pure string builders plus one
-// small download helper. Exports contain exactly the paper data — no
+// small download helper. Exports contain exactly the paper data - no
 // account identifiers, no ledger metadata.
 
 import type { Paper } from "../types";

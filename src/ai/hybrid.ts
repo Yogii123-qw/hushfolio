@@ -71,7 +71,7 @@ export function createHybridModel(
 
 /**
  * Start (or await) the on-device model download. MUST be called from a user
- * gesture — the caller is responsible for that; this wrapper only clamps
+ * gesture - the caller is responsible for that; this wrapper only clamps
  * progress values and maps errors honestly.
  */
 export async function downloadDeviceModel(

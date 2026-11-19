@@ -79,7 +79,7 @@ for (const [fgName, bgName, usage] of PAIRS) {
   const ok = value >= MIN_RATIO;
   if (!ok) failures += 1;
   console.log(
-    `${ok ? "PASS" : "FAIL"}  ${value.toFixed(2)}:1  ${fgName} (${fg}) on ${bgName} (${bg}) — ${usage}`,
+    `${ok ? "PASS" : "FAIL"}  ${value.toFixed(2)}:1  ${fgName} (${fg}) on ${bgName} (${bg}) - ${usage}`,
   );
 }
 

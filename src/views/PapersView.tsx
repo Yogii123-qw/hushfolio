@@ -403,7 +403,7 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
                       <span className="paper-row-title">{paper.title}</span>
                       <span className="paper-row-meta" style={{ display: "block" }}>
                         Updated {formatDateTime(paper.updatedAt)}
-                        {paper.tags.length > 0 ? ` — filed under ${paper.tags.join(", ")}` : ""}
+                        {paper.tags.length > 0 ? ` - filed under ${paper.tags.join(", ")}` : ""}
                       </span>
                       {paper.summary !== null ? <span className="paper-row-snippet">{paper.summary}</span> : null}
                     </span>
@@ -430,7 +430,7 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
                     <span>
                       <span className="paper-row-title">Locked paper</span>
                       <span className="paper-row-meta" style={{ display: "block" }}>
-                        Updated {formatDateTime(entry.updatedAt)} —{" "}
+                        Updated {formatDateTime(entry.updatedAt)} -{" "}
                         {entry.reason === "locked"
                           ? "enter your passphrase to open it"
                           : "it appears to have been altered and cannot be decrypted"}

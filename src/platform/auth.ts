@@ -1,6 +1,6 @@
 // Authentication flows: anonymous by default (one tap, no email), with an
 // optional upgrade to Google sign-in. A Google sign-in creates a SEPARATE
-// account with its own empty archive — the UI says this before the user
+// account with its own empty archive - the UI says this before the user
 // upgrades, because account linking is deliberately not implemented.
 
 import {

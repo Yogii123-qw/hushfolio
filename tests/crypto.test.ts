@@ -78,7 +78,7 @@ describe("encryptJson / decryptJson", () => {
   it("round-trips objects, strings, arrays and unicode", async () => {
     const key = await keyFor(PASSPHRASE, generateSalt());
     const value = {
-      title: "Bali trip — Ünïcödé ✓",
+      title: "Bali trip - Ünïcödé ✓",
       body: "Line one.\nLine two with emoji 🗝️.",
       tags: ["bali", "2026"],
       nested: { n: 42, list: [1, "two", null, true] },

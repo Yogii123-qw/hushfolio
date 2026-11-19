@@ -71,7 +71,7 @@ export function LedgerView({ ctx }: { ctx: AppContext }): JSX.Element {
         <p>
           A permanent record of every AI run: what ran, what was requested, where it actually ran,
           and whether it worked. The ledger never contains paper text, questions, photos, or model
-          output — metadata only.
+          output - metadata only.
         </p>
       </div>
 

@@ -52,7 +52,7 @@ interface DoubleModel {
   model: GenerativeModel;
 }
 
-/** Build a recording fake GenerativeModel. TEST ONLY — see the notice above. */
+/** Build a recording fake GenerativeModel. TEST ONLY - see the notice above. */
 function makeDoubleModel(config: DoubleConfig): DoubleModel {
   const requests: unknown[] = [];
   const streamRequests: unknown[] = [];
@@ -234,7 +234,7 @@ describe("readInferenceSource / requireResponseText", () => {
   });
 });
 
-describe("runAiAction — seal_scan", () => {
+describe("runAiAction - seal_scan", () => {
   it("runs only_on_device, parses the result, and records a metadata-only ledger entry", async () => {
     const double = makeDoubleModel({ text: SEAL_JSON, source: "on_device" });
     const ledger: LedgerRecordInput[] = [];
@@ -285,7 +285,7 @@ describe("runAiAction — seal_scan", () => {
   });
 });
 
-describe("runAiAction — summarize", () => {
+describe("runAiAction - summarize", () => {
   it("honors the actual inference source reported by the SDK", async () => {
     const double = makeDoubleModel({ text: SUMMARY_JSON, source: "in_cloud" });
     const ledger: LedgerRecordInput[] = [];
@@ -352,7 +352,7 @@ describe("runAiAction — summarize", () => {
   });
 });
 
-describe("runAiAction — ask", () => {
+describe("runAiAction - ask", () => {
   it("streams chunks in order and calls onStreamChunk for each", async () => {
     const double = makeDoubleModel({ text: "", source: "on_device", chunks: ["Hel", "lo", " there."] });
     const seenChunks: string[] = [];
@@ -396,7 +396,7 @@ describe("runAiAction — ask", () => {
   });
 });
 
-describe("runAiAction — photo_read", () => {
+describe("runAiAction - photo_read", () => {
   it("sends the prompt plus an inlineData image part, with multimodal options", async () => {
     const double = makeDoubleModel({ text: PHOTO_JSON, source: "on_device" });
     const { runtime, seenParams } = makeRuntime(double.model, async () => {});
@@ -432,7 +432,7 @@ describe("runAiAction — photo_read", () => {
   });
 });
 
-describe("runAiAction — connect_dots", () => {
+describe("runAiAction - connect_dots", () => {
   const papers = [makePaper("1", "Alpha", "body a"), makePaper("2", "Beta", "body b")];
 
   it("requires explicit consent before creating a model", async () => {
@@ -478,7 +478,7 @@ describe("runAiAction — connect_dots", () => {
   });
 });
 
-describe("runAiAction — prompt version", () => {
+describe("runAiAction - prompt version", () => {
   it("runs with an unknown prompt version by falling back to v1", async () => {
     const double = makeDoubleModel({ text: SUMMARY_JSON, source: "on_device" });
     const { runtime } = makeRuntime(double.model, async () => {}, {

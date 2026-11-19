@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Headless walkthrough for Hushfolio (Playwright + Chromium).
 
-Phase A — production build with NO Firebase config:
+Phase A - production build with NO Firebase config:
   SetupView must render on desktop + mobile with zero console errors and
   zero page errors. This proves the honest unconfigured state.
 
-Phase B — build with dummy (placeholder) Firebase config:
+Phase B - build with dummy (placeholder) Firebase config:
   the app must proceed past SetupView to SignInView, and an anonymous
   sign-in attempt must fail HONESTLY (error panel), because the dummy
   project does not exist. Console/network errors from Google's APIs are
@@ -37,7 +37,7 @@ RESULTS = {"steps": [], "console_errors": {}, "page_errors": {}}
 
 def record(step: str, ok: bool, detail: str = "") -> None:
     RESULTS["steps"].append({"step": step, "ok": ok, "detail": detail})
-    print(f"{'PASS' if ok else 'FAIL'}  {step}" + (f" — {detail}" if detail else ""))
+    print(f"{'PASS' if ok else 'FAIL'}  {step}" + (f" - {detail}" if detail else ""))
     if not ok:
         RESULTS["failed"] = True
 
@@ -113,7 +113,7 @@ def phase_b(playwright) -> None:
     """Dummy-config build: SignInView renders; anonymous sign-in fails honestly."""
     dummy_dir = REPO / "dist-dummy"
     if not dummy_dir.exists():
-        record("B: dummy build present", False, "dist-dummy/ missing — build it first (see README)")
+        record("B: dummy build present", False, "dist-dummy/ missing - build it first (see README)")
         return
     server = StaticServer(dummy_dir, 4174)
     try:

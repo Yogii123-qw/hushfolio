@@ -123,7 +123,7 @@ export function App(): JSX.Element {
         return;
       }
       try {
-        // App Check is initialized inside initServices, BEFORE getAI() —
+        // App Check is initialized inside initServices, BEFORE getAI() -
         // see the ORDER MATTERS note in src/platform/firebase.ts.
         const services = initServices(
           envResult.config,

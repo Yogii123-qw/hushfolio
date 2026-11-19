@@ -188,7 +188,7 @@ function readLegacyPaper(data: DocumentData, id: string): Paper | null {
 }
 
 /** True when the document still carries legacy plaintext content fields
- * (whether or not it already has a blob — a mixed document is migrated
+ * (whether or not it already has a blob - a mixed document is migrated
  * to the encrypted-only shape on read). */
 export function isLegacyDoc(data: DocumentData): boolean {
   return typeof data["title"] === "string" || typeof data["body"] === "string" || Array.isArray(data["tags"]);
@@ -271,7 +271,7 @@ export async function paperFromDoc(
 /**
  * Decide how a legacy document is sealed. Two cases:
  * - Pure legacy (no blob): encrypt the legacy fields into a fresh document.
- * - Mixed (blob + leftover plaintext fields): the blob is authoritative —
+ * - Mixed (blob + leftover plaintext fields): the blob is authoritative -
  *   re-encrypting the stale legacy fields over it would LOSE the blob's
  *   content, so only the plaintext fields are deleted and the blob is
  *   left untouched.

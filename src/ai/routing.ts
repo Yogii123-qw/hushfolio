@@ -1,7 +1,7 @@
 // Hybrid routing decisions, as a pure function.
 //
 // The decision table is the privacy guarantee of the whole product, so it
-// lives here — testable, side-effect free — and nowhere else. In
+// lives here - testable, side-effect free - and nowhere else. In
 // particular, Seal Scan can NEVER be routed to the cloud: no combination
 // of Remote Config, Strict mode, or connectivity changes that invariant.
 
@@ -79,7 +79,7 @@ export function decideRoute(input: RouteInput): RouteDecision {
   }
 
   // Online, not strict, cloud enabled: honor the operator's default mode.
-  // deviceAvailable does not gate this branch — every mode except
+  // deviceAvailable does not gate this branch - every mode except
   // ONLY_ON_DEVICE has a working fallback path by construction.
   return { blocked: false, mode: defaultMode };
 }

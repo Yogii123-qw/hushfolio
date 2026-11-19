@@ -1,4 +1,4 @@
-// PREVIEW FIXTURE — stands in for src/data/papers.ts in the preview
+// PREVIEW FIXTURE - stands in for src/data/papers.ts in the preview
 // bundle only. Returns sample data so views can be rendered for layout
 // review. Never imported by production code.
 

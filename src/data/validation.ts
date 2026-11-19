@@ -1,5 +1,5 @@
 // Input validation for papers. Pure functions, fully unit-tested.
-// Error messages name the field and the limit — never the submitted text.
+// Error messages name the field and the limit - never the submitted text.
 
 import { z } from "zod";
 import type { PaperInput } from "../types";

@@ -18,7 +18,7 @@ function base(overrides: Partial<RouteInput>): RouteInput {
   };
 }
 
-describe("decideRoute — Seal Scan invariant", () => {
+describe("decideRoute - Seal Scan invariant", () => {
   it("routes seal_scan to only_on_device for every combination of flags when the device model is ready", () => {
     for (const strictMode of [false, true]) {
       for (const online of [false, true]) {
@@ -50,7 +50,7 @@ describe("decideRoute — Seal Scan invariant", () => {
   });
 });
 
-describe("decideRoute — Connect the dots", () => {
+describe("decideRoute - Connect the dots", () => {
   it("is blocked by Strict mode", () => {
     const decision = decideRoute(base({ action: "connect_dots", strictMode: true }));
     expect(decision.blocked).toBe(true);
@@ -72,7 +72,7 @@ describe("decideRoute — Connect the dots", () => {
   });
 });
 
-describe("decideRoute — summarize, ask, photo_read", () => {
+describe("decideRoute - summarize, ask, photo_read", () => {
   for (const action of ["summarize", "ask", "photo_read"] as const) {
     it(`${action}: strict mode forces only_on_device when the device model is ready`, () => {
       expect(decideRoute(base({ action, strictMode: true }))).toEqual({ blocked: false, mode: "only_on_device" });

@@ -1,4 +1,4 @@
-// PREVIEW FIXTURE — stands in for src/ai/actions.ts in the preview
+// PREVIEW FIXTURE - stands in for src/ai/actions.ts in the preview
 // bundle only. Returns canned results so the AI panel layout can be
 // reviewed. The canned text is labeled as a preview fixture in the
 // harness banner; it never ships in the production bundle.

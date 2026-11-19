@@ -6,7 +6,7 @@ The harness bundle must already be built:
   npx vite build --config vite.preview.config.ts
 
 Screenshots land in the audit directory. Console/page errors fail the run.
-These renders review LAYOUT ONLY — they prove nothing about live Firebase
+These renders review LAYOUT ONLY - they prove nothing about live Firebase
 behavior (see preview/README.md).
 """
 
@@ -28,7 +28,7 @@ RESULTS = {"steps": [], "console_errors": {}, "page_errors": {}, "failed": False
 
 def record(step: str, ok: bool, detail: str = "") -> None:
     RESULTS["steps"].append({"step": step, "ok": ok, "detail": detail})
-    print(f"{'PASS' if ok else 'FAIL'}  {step}" + (f" — {detail}" if detail else ""))
+    print(f"{'PASS' if ok else 'FAIL'}  {step}" + (f" - {detail}" if detail else ""))
     if not ok:
         RESULTS["failed"] = True
 
@@ -65,7 +65,7 @@ def shot(page, name: str) -> None:
 
 def main() -> int:
     if not (REPO / "dist-preview").exists():
-        print("dist-preview/ missing — build the preview bundle first.")
+        print("dist-preview/ missing - build the preview bundle first.")
         return 1
     server = StaticServer(REPO / "dist-preview", 4175)
     try:

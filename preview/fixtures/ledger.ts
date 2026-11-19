@@ -1,4 +1,4 @@
-// PREVIEW FIXTURE — stands in for src/data/ledger.ts in the preview
+// PREVIEW FIXTURE - stands in for src/data/ledger.ts in the preview
 // bundle only. Never imported by production code.
 
 import { FIXTURE_LEDGER } from "./data";

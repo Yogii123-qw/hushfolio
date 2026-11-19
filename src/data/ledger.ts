@@ -1,6 +1,6 @@
 // Firestore access for the inference ledger. Entries are append-only
 // audit records (the security rules forbid updates and deletes) and store
-// metadata only — never prompts or model outputs.
+// metadata only - never prompts or model outputs.
 
 import {
   addDoc,

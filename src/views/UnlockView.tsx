@@ -55,7 +55,7 @@ export function UnlockView({ mode, services, user, onUnlocked }: UnlockViewProps
             Before the first paper, set an encryption passphrase. Papers are encrypted on this device
             with AES-GCM before they reach Firestore, and only this passphrase can open them again.
             The passphrase is never stored anywhere. If you forget it, your papers cannot be
-            recovered — there is no reset. Write it down somewhere safe.
+            recovered - there is no reset. Write it down somewhere safe.
           </p>
         ) : (
           <p>

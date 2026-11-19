@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Live verification for Hushfolio against the REAL Firebase project
-(hushfolio-133fb) — the Firebase gate for BuildHybridAI 2026.
+(hushfolio-133fb) - the Firebase gate for BuildHybridAI 2026.
 
 Serves the production build (dist/, built with the real .env) and drives it
 in headless Chromium via Playwright:
@@ -47,7 +47,7 @@ RESULTS = {"steps": [], "console_errors": [], "page_errors": [], "status_rows": 
 
 def record(step: str, ok: bool, detail: str = "") -> None:
     RESULTS["steps"].append({"step": step, "ok": ok, "detail": detail})
-    print(f"{'PASS' if ok else 'FAIL'}  {step}" + (f" — {detail}" if detail else ""), flush=True)
+    print(f"{'PASS' if ok else 'FAIL'}  {step}" + (f" - {detail}" if detail else ""), flush=True)
     if not ok:
         RESULTS["failed"] = True
 
@@ -188,7 +188,7 @@ def main() -> int:
             page.goto("http://127.0.0.1:4175/", wait_until="networkidle")
             page.wait_for_timeout(1000)
 
-            # L01/L02 — sign in anonymously.
+            # L01/L02 - sign in anonymously.
             try:
                 page.wait_for_selector("h1:has-text('Your papers stay yours')", timeout=30000)
                 record("L01: SignInView renders (past SetupView, real config)", True)
@@ -206,7 +206,7 @@ def main() -> int:
                 browser.close()
                 return 1
 
-            # L03 — Status view rows.
+            # L03 - Status view rows.
             page.get_by_role("button", name="Status").click()
             page.wait_for_selector("h1:has-text('Status')", timeout=10000)
             page.wait_for_timeout(12000)  # Remote Config fetch + Firestore probe
@@ -223,14 +223,14 @@ def main() -> int:
                 ("max paper 20,000", "20,000" in status_text),
             ]
             for name, ok in checks:
-                record(f"L03: status — {name}", ok)
+                record(f"L03: status - {name}", ok)
             if "Not supported in this browser" in status_text or "Not available on this device" in status_text:
                 record("L03: on-device model honestly reported unavailable here", True, "headless Chromium has no Gemini Nano")
             else:
                 record("L03: on-device model status recorded", True, status_text.split("On-device model")[-1][:120].replace("\n", " "))
             page.screenshot(path=str(OUT / "live-status-desktop.png"), full_page=True)
 
-            # L04 — create two papers (Firestore write + read round-trip).
+            # L04 - create two papers (Firestore write + read round-trip).
             page.get_by_role("button", name="Papers").click()
             page.wait_for_selector("h1:has-text('Papers')", timeout=10000)
             ok1 = create_paper(page, PAPER_1)
@@ -241,7 +241,7 @@ def main() -> int:
                 browser.close()
                 return 1
 
-            # L05–L08 — open paper 1, run the four single-paper actions.
+            # L05-L08 - open paper 1, run the four single-paper actions.
             if not open_paper(page, PAPER_1["title"]):
                 record("L05: open paper 1", False)
                 browser.close()
@@ -291,7 +291,7 @@ def main() -> int:
                 record("L08: Photo read transcribes the note in the cloud", False, page.locator("body").inner_text()[-300:].replace("\n", " "))
             page.screenshot(path=str(OUT / "live-paper-desktop.png"), full_page=True)
 
-            # L09 — Connect the dots across both papers (consent modal).
+            # L09 - Connect the dots across both papers (consent modal).
             page.get_by_role("button", name="Papers").click()
             page.wait_for_selector("h1:has-text('Papers')", timeout=10000)
             page.locator(f"input[aria-label='Select {PAPER_1['title']}']").check()
@@ -312,7 +312,7 @@ def main() -> int:
             except Exception as exc:
                 record("L09: Connect the dots returns a cloud result", False, str(exc)[:200])
 
-            # L10 — Ledger records the runs with sources.
+            # L10 - Ledger records the runs with sources.
             page.get_by_role("button", name="Ledger").click()
             page.wait_for_timeout(3000)
             ledger_text = page.locator("body").inner_text()
@@ -321,7 +321,7 @@ def main() -> int:
             record("L10: ledger shows Cloud source", "Cloud" in ledger_text)
             page.screenshot(path=str(OUT / "live-ledger-desktop.png"), full_page=True)
 
-            # L11 — cleanup: delete both test papers.
+            # L11 - cleanup: delete both test papers.
             page.get_by_role("button", name="Papers").click()
             page.wait_for_selector("h1:has-text('Papers')", timeout=10000)
             d1 = False

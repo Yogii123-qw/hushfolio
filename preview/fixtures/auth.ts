@@ -1,4 +1,4 @@
-// PREVIEW FIXTURE — stands in for src/platform/auth.ts in the preview
+// PREVIEW FIXTURE - stands in for src/platform/auth.ts in the preview
 // bundle only. Never imported by production code.
 
 export function watchAuth() {

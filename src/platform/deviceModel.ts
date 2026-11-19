@@ -1,6 +1,6 @@
 // On-device model availability probe, using the Chrome Prompt API surface
 // (`LanguageModel.availability()`). This probe NEVER triggers a model
-// download — only the Firebase SDK's `initializeDeviceModel()`, called from
+// download - only the Firebase SDK's `initializeDeviceModel()`, called from
 // an explicit user gesture, can start one. Results are browser-reported
 // and are labeled as such in the UI.
 

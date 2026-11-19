@@ -126,7 +126,7 @@ export function SettingsView({ ctx }: { ctx: AppContext }): JSX.Element {
         <h2>Account</h2>
         <p>
           {user.isAnonymous
-            ? `Anonymous account. Your archive is tied to this browser identity (${user.uid}). If you clear site data, the archive stays behind — export regularly.`
+            ? `Anonymous account. Your archive is tied to this browser identity (${user.uid}). If you clear site data, the archive stays behind - export regularly.`
             : `Signed in as ${user.email ?? user.uid}.`}
         </p>
         <p style={{ marginTop: 8 }}>
@@ -179,7 +179,7 @@ export function SettingsView({ ctx }: { ctx: AppContext }): JSX.Element {
           A private papers archive built for the #BuildHybridAI 2026 hackathon. Hybrid inference via
           Firebase AI Logic: Gemini Nano on the device, {config.cloudModel} in the cloud, routed by
           action and by your choices, with every run recorded in the ledger. App Check, Remote
-          Config, Authentication, and Firestore are all real Firebase services in this build — no
+          Config, Authentication, and Firestore are all real Firebase services in this build - no
           demo mode exists anywhere in the app.
         </p>
         <p style={{ marginTop: 8 }}>

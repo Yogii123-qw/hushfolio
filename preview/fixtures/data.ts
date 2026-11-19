@@ -1,4 +1,4 @@
-// PREVIEW FIXTURES — sample text for layout review only. Never shipped
+// PREVIEW FIXTURES - sample text for layout review only. Never shipped
 // in the production bundle, never presented as real user data.
 
 import type { LedgerEntry, Paper } from "../src/types";
@@ -43,7 +43,7 @@ export const FIXTURE_PAPERS: Paper[] = [
   },
   {
     id: "paper-meeting",
-    title: "Meeting notes — November planning",
+    title: "Meeting notes - November planning",
     body: "Attendees: the whole team.\n\n1. The November release stays on schedule.\n2. The budget review moves to next Tuesday.\n3. Two open questions: the new onboarding flow, and the support rota for the holidays.\n\nAction items were assigned at the end of the meeting. Next check-in in two weeks.",
     tags: ["work"],
     mood: "tense",

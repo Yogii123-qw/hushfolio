@@ -3,7 +3,7 @@
 // bad remote value can never produce a missing prompt.
 //
 // Every structured prompt instructs the model to return JSON ONLY with no
-// markdown fences and no extra keys — belt and suspenders alongside the
+// markdown fences and no extra keys - belt and suspenders alongside the
 // SDK-level response schema / response constraint.
 
 import { logWarn } from "../platform/logging";

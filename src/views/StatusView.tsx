@@ -79,7 +79,7 @@ export function StatusView({ ctx }: { ctx: AppContext }): JSX.Element {
     },
     {
       name: "App Check",
-      value: `${appCheck.mode === "recaptcha" ? "Active (reCAPTCHA Enterprise)" : appCheck.mode === "debug" ? "Debug mode" : "Not active"} — ${appCheck.detail}`,
+      value: `${appCheck.mode === "recaptcha" ? "Active (reCAPTCHA Enterprise)" : appCheck.mode === "debug" ? "Debug mode" : "Not active"} - ${appCheck.detail}`,
     },
     {
       name: "Firestore",
@@ -104,7 +104,7 @@ export function StatusView({ ctx }: { ctx: AppContext }): JSX.Element {
       name: "AI Logic backend",
       value: `Gemini Developer API (Firebase AI Logic). Cloud model: ${config.cloudModel}. Hybrid inference requires Chrome on desktop, version 139 or higher.`,
     },
-    { name: "Network", value: ctx.online ? "Online" : "Offline — AI actions use the on-device model only." },
+    { name: "Network", value: ctx.online ? "Online" : "Offline - AI actions use the on-device model only." },
     {
       name: "On-device model",
       value: `${DEVICE_STATUS_LABELS[deviceProbe.status]}. ${deviceProbe.detail}`,
@@ -117,7 +117,7 @@ export function StatusView({ ctx }: { ctx: AppContext }): JSX.Element {
         <h1>Status</h1>
         <p>
           Every subsystem, stated plainly. If something is not working, this page says what and
-          what to do next — nothing here is guessed.
+          what to do next - nothing here is guessed.
         </p>
       </div>
 

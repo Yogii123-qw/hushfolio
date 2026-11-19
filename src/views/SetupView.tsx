@@ -2,7 +2,7 @@ import type { JSX } from "react";
 
 /**
  * Setup state: shown when Firebase configuration is missing. This is an
- * honest stopped state with real setup steps — the app never pretends to
+ * honest stopped state with real setup steps - the app never pretends to
  * work without a project, and never shows fake papers or fake AI output.
  */
 export function SetupView({ missingKeys }: { missingKeys: string[] }): JSX.Element {

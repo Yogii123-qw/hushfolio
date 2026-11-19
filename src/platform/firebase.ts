@@ -112,7 +112,7 @@ export function initServices(config: FirebaseEnvConfig, appCheckOptions: AppChec
       "Reload the page with a single consistent .env configuration.",
     );
   }
-  // App Check BEFORE getAI() — see the ORDER MATTERS note above.
+  // App Check BEFORE getAI() - see the ORDER MATTERS note above.
   const appCheck = initAppCheckForApp(app, appCheckOptions);
   const services: FirebaseServices = {
     app,
