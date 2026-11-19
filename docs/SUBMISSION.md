@@ -113,7 +113,7 @@ is recorded.
    Google APIs (egress-proxy tunnel failure; curl works), so the
    in-browser sign-in/cloud path is unverified there; the test chat
    tries Firefox first, then REST-API verification.
-3. **Public repo**: DONE 19 Nov 2026 07:09 WIB — pushed public to
+3. **Public repo**: DONE 19 Nov 2026 07:09 WIB, pushed public to
    github.com/Yogii123-qw/hushfolio (Apache-2.0). Local commits after
    the push (em-dash cleanup, doc fixes, App Check Enterprise fix)
    are not yet pushed; a push needs the owner's word.
@@ -140,8 +140,8 @@ is recorded.
 
 ## Judging criteria (for the owner's reference)
 
-Equal weight, 1–5 each: Technological Implementation, Design, Potential
-Impact, Quality of the Idea. Judging 10–16 Dec 2026; winners announced on
+Equal weight, 1-5 each: Technological Implementation, Design, Potential
+Impact, Quality of the Idea. Judging 10-16 Dec 2026; winners announced on
 or around 21 Dec 2026 12:00 PT (22 Dec 2026 03:00 WIB). Prizes: Grand
 $10,000; 1st Runner Up $7,000; 2nd Runner Up $4,000; Best iOS / Android /
 Web-Chrome $3,000 each. One submission can win one grand prize plus at

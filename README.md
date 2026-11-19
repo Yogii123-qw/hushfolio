@@ -17,7 +17,7 @@ and every run is recorded in a ledger that shows exactly where it ran.
 | Summarize & file | `prefer_on_device` | Structured JSON: title, summary, tags, mood. Saved only when you approve. |
 | Ask this paper | `prefer_on_device`, streaming | Single-turn Q&A over one paper. Answers only from that paper; refuses to invent. |
 | Photo read | `prefer_on_device`, multimodal | Reads a JPEG/PNG photo of a paper document. Warns before running if cloud fallback could send the photo. Photo bytes stay in the browser tab; only extracted text and photo details are saved. |
-| Connect the dots | `prefer_in_cloud`, explicit consent | Themes, connections, and a timeline across 2–8 papers. A consent modal explains that content leaves the device. Disabled in Strict mode. Offline, it falls back to the on-device model per documented SDK semantics, and the result is labeled with its actual source. |
+| Connect the dots | `prefer_in_cloud`, explicit consent | Themes, connections, and a timeline across 2-8 papers. A consent modal explains that content leaves the device. Disabled in Strict mode. Offline, it falls back to the on-device model per documented SDK semantics, and the result is labeled with its actual source. |
 
 **Strict mode** (Settings) forces `only_on_device` for every action and
 disables Connect the dots. **The ledger** records metadata only, action,
@@ -56,7 +56,7 @@ check value live in the user's own Firestore document so the same
 passphrase unlocks the archive on any device. Papers written before
 encryption are sealed automatically the first time they are read with the
 archive unlocked. If the passphrase is forgotten, the sealed papers cannot
-be recovered — there is no reset. Changing the passphrase is not supported
+be recovered. There is no reset. Changing the passphrase is not supported
 yet.
 
 ## Setup
