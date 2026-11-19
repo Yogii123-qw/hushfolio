@@ -1,7 +1,7 @@
 # Hushfolio — STATE
 
-## Current phase: Live verification done, Apa Adanya ($0) chosen, pushing fixes
-Updated 19 Nov 2026 ~17:45 WIB.
+## Current phase: GitHub Pages hosting LIVE (item 1 of 3 $0 improvements done), encryption next
+Updated 19 Nov 2026 ~18:19 WIB.
 
 ## Done
 - Build complete (19 Nov 00:56 WIB): 159/159 tests, production build
@@ -51,6 +51,24 @@ Updated 19 Nov 2026 ~17:45 WIB.
   exact panel text on a real 403. README documents the Spark free-tier
   deployment and the Blaze requirement for Cloud Vertex AI. Tests
   162/162, build (tsc + vite) passes, Groq final review: APPROVE.
+- GitHub Pages hosting LIVE (19 Nov 18:1x WIB, item 1 of 3 $0
+  improvements, owner order 18:10 WIB): vite.config.ts base set to
+  "/hushfolio/" (commit f3f8dd8, Groq review APPROVE, tests 162/162,
+  build passes); dist (1.1 MB) deployed to branch gh-pages (4e07761)
+  with .nojekyll; Pages enabled via API (source gh-pages, path /).
+  Site live at https://yogii123-qw.github.io/hushfolio/ (HTTP 200,
+  JS + favicon 200). Domains added 19 Nov 18:16 WIB (browser task,
+  brunosrna44@gmail.com): reCAPTCHA Enterprise key "Hushfolio web"
+  now allows yogii123-qw.github.io (bare host, no protocol/path);
+  Firebase Auth authorized domains likewise. Live verification from
+  the Pages origin (scripts in audit folder: pages-verification.py):
+  10/12 first run, 12/12 after correcting two check-design flaws
+  (P5 panel locator read only the heading; P11 counted the app's own
+  handled-403 log as an error). Verified: anonymous sign-in, paper
+  create/open/delete, reCAPTCHA request on github.io, App Check
+  exchange 200, Vertex 403 (not 401), friendly Blaze panel verbatim,
+  ledger records the failure, no request to domain root /, all
+  requests HTTPS, 0 page errors. No service worker in src/.
 
 ## Advisor consultations (SOP protocol)
 - 19 Nov ~15:45 WIB, Groq gpt-oss-120b: "Will ReCaptchaV3Provider work
@@ -72,18 +90,24 @@ Updated 19 Nov 2026 ~17:45 WIB.
   README note, tests). Verdict: APPROVE. Two review questions settled
   by evidence first: `appCheck` in App.tsx is used (boot state), and
   `initServices` has a single caller.
+- 19 Nov 18:12 WIB, Groq gpt-oss-120b: final pre-push review of the
+  hosting diff (vite base "/hushfolio/" + STATE.md notes on the 403).
+  Verdict: APPROVE. Evidence first: build passes, dist paths are
+  /hushfolio/*, no react-router, no absolute paths in src/, dist
+  gitignored, tests 162/162, no secrets in the diff.
 
 ## In progress
-- Pushing the fixes (owner ordered 19 Nov 17:38 WIB, Apa Adanya).
-  Commit includes: timestamp fix, App Check init-order fix, friendly
-  403 message + test, README free-tier note, live-verification
-  Firefox script (scripts/live-verification-firefox.py, no secrets).
-  Full audit: ~/workspace/hackathons/pt11/audit-buildhybridai/
+- Item 2 of 3 $0 improvements (owner order 18:10 WIB): real
+  encryption (WebCrypto AES-GCM, PBKDF2 passphrase key). Groq
+  consultation first (SOP), then implementation.
+- Item 3: fresh Firebase project test (staged; stop at stage 1 if 403).
+- Demo video on HOLD until all three items are done (video must be
+  recorded from the final build). Full audit:
+  ~/workspace/hackathons/pt11/audit-buildhybridai/
   LIVE-VERIFICATION-2026-11-19.md.
 
 ## Remaining owner gates
-- Demo video ≤ 3 min, public YouTube (after this push).
-- Hosting decision (owner).
+- Demo video ≤ 3 min, public YouTube (after all three $0 items).
 - Devpost submit before Tue 1 Dec 2026 05:00 WIB.
 - Cloud AI stays off on the Spark plan: cloud actions fail with the
   friendly Blaze message until the owner enables billing.
