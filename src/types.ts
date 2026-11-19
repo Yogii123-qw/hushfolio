@@ -68,6 +68,23 @@ export interface Paper {
   updatedAt: number;
 }
 
+/**
+ * A paper whose content could not be decrypted. The list and the paper
+ * view render this as an honest placeholder, never silently skip it.
+ * `locked` = no key in memory (unlock first); `corrupt` = the blob failed
+ * authentication (wrong passphrase or tampered data).
+ */
+export interface LockedPaper {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  reason: "locked" | "corrupt";
+}
+
+export function isLockedPaper(paper: Paper | LockedPaper): paper is LockedPaper {
+  return "reason" in paper;
+}
+
 export interface PaperInput {
   title: string;
   body: string;

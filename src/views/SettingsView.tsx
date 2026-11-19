@@ -3,7 +3,7 @@ import type { AppContext } from "../appContext";
 import { ErrorPanel, InlineNotice } from "../components/feedback";
 import { ConfirmDialog } from "../components/Modal";
 import { downloadTextFile, exportFilename, papersToJson, papersToMarkdown } from "../data/export";
-import { fetchPapersForSearch } from "../data/papers";
+import { fetchPapersForSearch, SEARCH_FETCH_CAP } from "../data/papers";
 import { signInWithGoogleFlow, signOutFlow } from "../platform/auth";
 import { toAppError, type AppError } from "../errors";
 import { formatDateTime } from "../utils";
@@ -22,13 +22,17 @@ export function SettingsView({ ctx }: { ctx: AppContext }): JSX.Element {
     setExportError(null);
     setExportNote(null);
     try {
-      const fetched = await fetchPapersForSearch(services.db, user.uid);
+      const fetched = await fetchPapersForSearch(services.db, user.uid, SEARCH_FETCH_CAP, ctx.cryptoKey);
       const content = format === "json" ? papersToJson(fetched.papers) : papersToMarkdown(fetched.papers);
       downloadTextFile(exportFilename(format === "json" ? "json" : "md", new Date()), content, format === "json" ? "application/json" : "text/markdown");
+      const lockedNote =
+        fetched.lockedCount > 0
+          ? ` ${fetched.lockedCount} locked ${fetched.lockedCount === 1 ? "paper was" : "papers were"} not included in this export.`
+          : "";
       setExportNote(
-        fetched.truncated
+        (fetched.truncated
           ? `Exported the ${fetched.papers.length} most recently updated papers. Older papers were not included in this export.`
-          : `Exported ${fetched.papers.length} ${fetched.papers.length === 1 ? "paper" : "papers"}.`,
+          : `Exported ${fetched.papers.length} ${fetched.papers.length === 1 ? "paper" : "papers"}.`) + lockedNote,
       );
     } catch (error) {
       setExportError(toAppError(error, "Export failed"));
@@ -94,6 +98,27 @@ export function SettingsView({ ctx }: { ctx: AppContext }): JSX.Element {
         <p style={{ marginTop: 12 }}>
           Strict mode applies for this browser session. The default for new sessions is set by Remote
           Config ({config.strictModeDefault ? "on" : "off"}).
+        </p>
+      </section>
+
+      <section className="settings-block">
+        <h2>Encryption</h2>
+        <p>
+          Your papers are encrypted on this device with AES-GCM before they reach Firestore. The
+          passphrase never leaves this device and is never stored. If you forget it, your papers
+          cannot be recovered.
+        </p>
+        <p style={{ marginTop: 8 }}>
+          Archive status: {ctx.cryptoKey !== null ? "unlocked on this device." : "locked."}
+        </p>
+        <div className="settings-actions">
+          <button type="button" className="button button-secondary" onClick={() => ctx.onLock()}>
+            Lock the archive
+          </button>
+        </div>
+        <p style={{ marginTop: 8 }}>
+          Changing the passphrase is not supported yet; the archive stays sealed with the passphrase
+          you set first.
         </p>
       </section>
 

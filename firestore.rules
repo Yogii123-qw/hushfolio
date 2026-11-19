@@ -12,19 +12,37 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    function validPaper(data) {
-      return data.keys().hasAll(['title', 'body', 'tags'])
-        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
-        && data.body is string && data.body.size() >= 1 && data.body.size() <= 20000
-        && data.tags is list && data.tags.size() <= 12
-        && (!('summary' in data) || data.summary == null
-            || (data.summary is string && data.summary.size() <= 2000));
+    // Encrypted papers (19 Nov 2026): content lives in one AES-GCM blob.
+    // New writes are encrypted-only; legacy plaintext documents still
+    // read (and are migrated on first read), but no new plaintext may be
+    // written, and an encrypted document must not carry legacy plaintext
+    // fields beside the blob. The blob cap (100,000 chars) covers a
+    // 20,000-char paper plus JSON overhead after base64.
+    function validEncryptedPaper(data) {
+      return data.keys().hasAll(['encryptedBlob'])
+        && data.encryptedBlob is string && data.encryptedBlob.size() >= 10
+        && data.encryptedBlob.size() <= 100000
+        && (!('photo' in data) || data.photo == null || data.photo is map)
+        && !('title' in data) && !('body' in data) && !('tags' in data)
+        && !('summary' in data) && !('sensitivity' in data) && !('mood' in data);
+    }
+
+    // The user's own document holds the encryption salt + check value
+    // (both public, non-secret data; the passphrase is never stored).
+    function validUserDoc(data) {
+      return (!('encryptionSalt' in data) || data.encryptionSalt is string)
+        && (!('encryptionCheck' in data) || data.encryptionCheck is string);
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validUserDoc(request.resource.data);
     }
 
     match /users/{uid}/papers/{paperId} {
       allow read: if isOwner(uid);
-      allow create: if isOwner(uid) && validPaper(request.resource.data);
-      allow update: if isOwner(uid) && validPaper(request.resource.data);
+      allow create: if isOwner(uid) && validEncryptedPaper(request.resource.data);
+      allow update: if isOwner(uid) && validEncryptedPaper(request.resource.data);
       allow delete: if isOwner(uid);
     }
 

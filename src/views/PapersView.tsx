@@ -7,11 +7,11 @@ import type { AppContext } from "../appContext";
 import { ErrorPanel, EmptyState, InlineNotice, SealBadge, SourcePill } from "../components/feedback";
 import { Modal } from "../components/Modal";
 import { LinkIcon } from "../components/icons";
-import { fetchPapersForSearch, createPaper, listPapersPage } from "../data/papers";
+import { fetchPapersForSearch, createPaper, listPapersPage, SEARCH_FETCH_CAP } from "../data/papers";
 import { collectTags, filterPapersByTag, searchPapers } from "../data/search";
 import { splitTagField, validatePaperInput } from "../data/validation";
 import { AppError, toAppError } from "../errors";
-import type { Paper } from "../types";
+import type { LockedPaper, Paper } from "../types";
 import { formatDateTime, formatDuration } from "../utils";
 
 const CONNECT_MAX_PAPERS = 8;
@@ -37,6 +37,7 @@ interface PapersViewProps {
 export function PapersView({ ctx, composing, onComposingChange, draft, onDraftChange, onOpenPaper }: PapersViewProps): JSX.Element {
   const { services, user, config } = ctx;
   const [papers, setPapers] = useState<Paper[]>([]);
+  const [locked, setLocked] = useState<LockedPaper[]>([]);
   const [cursor, setCursor] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -47,6 +48,7 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Paper[] | null>(null);
   const [searchTruncated, setSearchTruncated] = useState(false);
+  const [searchLockedCount, setSearchLockedCount] = useState(0);
   const [searching, setSearching] = useState(false);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
 
@@ -77,9 +79,10 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
     setLoading(true);
     setError(null);
     try {
-      const page = await listPapersPage(services.db, user.uid, config.pageSize, null);
+      const page = await listPapersPage(services.db, user.uid, config.pageSize, null, ctx.cryptoKey);
       if (!mountedRef.current) return;
       setPapers(page.papers);
+      setLocked(page.locked);
       setCursor(page.nextCursor);
       setHasMore(page.hasMore);
       setSkippedMalformed(page.skippedMalformed);
@@ -89,7 +92,7 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [services.db, user.uid, config.pageSize]);
+  }, [services.db, user.uid, config.pageSize, ctx.cryptoKey]);
 
   useEffect(() => {
     void loadFirstPage();
@@ -99,9 +102,10 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
     if (cursor === null || loadingMore) return;
     setLoadingMore(true);
     try {
-      const page = await listPapersPage(services.db, user.uid, config.pageSize, cursor);
+      const page = await listPapersPage(services.db, user.uid, config.pageSize, cursor, ctx.cryptoKey);
       if (!mountedRef.current) return;
       setPapers((prev) => [...prev, ...page.papers]);
+      setLocked((prev) => [...prev, ...page.locked]);
       setCursor(page.nextCursor);
       setHasMore(page.hasMore);
       setSkippedMalformed((prev) => prev + page.skippedMalformed);
@@ -124,10 +128,11 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
     const timer = setTimeout(() => {
       void (async () => {
         try {
-          const fetched = await fetchPapersForSearch(services.db, user.uid);
+          const fetched = await fetchPapersForSearch(services.db, user.uid, SEARCH_FETCH_CAP, ctx.cryptoKey);
           if (!mountedRef.current) return;
           setSearchResults(searchPapers(fetched.papers, trimmed));
           setSearchTruncated(fetched.truncated);
+          setSearchLockedCount(fetched.lockedCount);
         } catch (searchError) {
           if (mountedRef.current) setError(toAppError(searchError, "Searching papers failed"));
         } finally {
@@ -136,7 +141,7 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
       })();
     }, 350);
     return () => clearTimeout(timer);
-  }, [query, services.db, user.uid]);
+  }, [query, services.db, user.uid, ctx.cryptoKey]);
 
   const displayed = tagFilter === null ? (searchResults ?? papers) : filterPapersByTag(searchResults ?? papers, tagFilter);
   const allTags = collectTags(papers);
@@ -153,7 +158,7 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
     setFormIssues([]);
     setSaving(true);
     try {
-      const id = await createPaper(services.db, user.uid, validated.value, config.maxPaperChars);
+      const id = await createPaper(services.db, user.uid, validated.value, config.maxPaperChars, ctx.cryptoKey);
       onDraftChange(EMPTY_DRAFT);
       onComposingChange(false);
       onOpenPaper(id);
@@ -320,6 +325,12 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
           text="Search covered the 200 most recently updated papers only. Older papers were not searched."
         />
       ) : null}
+      {searchResults !== null && searchLockedCount > 0 ? (
+        <InlineNotice
+          tone="warn"
+          text={`${searchLockedCount} locked ${searchLockedCount === 1 ? "paper was" : "papers were"} not searched, because the content could not be decrypted.`}
+        />
+      ) : null}
       {skippedMalformed > 0 ? (
         <InlineNotice
           tone="warn"
@@ -354,7 +365,7 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
 
       {loading ? (
         <p style={{ marginTop: 24 }}>Loading your papers…</p>
-      ) : displayed.length === 0 ? (
+      ) : displayed.length === 0 && locked.length === 0 ? (
         <div style={{ marginTop: 24 }}>
           {query.trim() === "" && tagFilter === null ? (
             <EmptyState
@@ -371,39 +382,66 @@ export function PapersView({ ctx, composing, onComposingChange, draft, onDraftCh
           )}
         </div>
       ) : (
-        <div className="paper-index" style={{ marginTop: 24 }}>
-          {displayed.map((paper) => (
-            <div key={paper.id} style={{ display: "flex", alignItems: "stretch" }}>
-              {selecting ? (
-                <label className="select-row" style={{ paddingLeft: 16 }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(paper.id)}
-                    onChange={() => toggleSelect(paper.id)}
-                    aria-label={`Select ${paper.title}`}
-                    disabled={!selectedIds.has(paper.id) && selectedIds.size >= CONNECT_MAX_PAPERS}
-                  />
-                </label>
-              ) : null}
-              <button type="button" className="paper-row" onClick={() => onOpenPaper(paper.id)} style={{ flex: 1 }}>
-                <span>
-                  <span className="paper-row-title">{paper.title}</span>
-                  <span className="paper-row-meta" style={{ display: "block" }}>
-                    Updated {formatDateTime(paper.updatedAt)}
-                    {paper.tags.length > 0 ? ` — filed under ${paper.tags.join(", ")}` : ""}
-                  </span>
-                  {paper.summary !== null ? <span className="paper-row-snippet">{paper.summary}</span> : null}
-                </span>
-                <span className="paper-row-side">
-                  {paper.sensitivity !== null && paper.sensitivity.scannedOnDevice ? (
-                    <SealBadge label="Sealed" />
+        <>
+          {displayed.length > 0 ? (
+            <div className="paper-index" style={{ marginTop: 24 }}>
+              {displayed.map((paper) => (
+                <div key={paper.id} style={{ display: "flex", alignItems: "stretch" }}>
+                  {selecting ? (
+                    <label className="select-row" style={{ paddingLeft: 16 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(paper.id)}
+                        onChange={() => toggleSelect(paper.id)}
+                        aria-label={`Select ${paper.title}`}
+                        disabled={!selectedIds.has(paper.id) && selectedIds.size >= CONNECT_MAX_PAPERS}
+                      />
+                    </label>
                   ) : null}
-                  <span className="tag-static">{paper.mood}</span>
-                </span>
-              </button>
+                  <button type="button" className="paper-row" onClick={() => onOpenPaper(paper.id)} style={{ flex: 1 }}>
+                    <span>
+                      <span className="paper-row-title">{paper.title}</span>
+                      <span className="paper-row-meta" style={{ display: "block" }}>
+                        Updated {formatDateTime(paper.updatedAt)}
+                        {paper.tags.length > 0 ? ` — filed under ${paper.tags.join(", ")}` : ""}
+                      </span>
+                      {paper.summary !== null ? <span className="paper-row-snippet">{paper.summary}</span> : null}
+                    </span>
+                    <span className="paper-row-side">
+                      {paper.sensitivity !== null && paper.sensitivity.scannedOnDevice ? (
+                        <SealBadge label="Sealed" />
+                      ) : null}
+                      <span className="tag-static">{paper.mood}</span>
+                    </span>
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          ) : null}
+          {locked.length > 0 && searchResults === null && tagFilter === null ? (
+            <div style={{ marginTop: 24 }}>
+              <h2 className="section-title">Locked papers</h2>
+              <p style={{ fontSize: 14, color: "var(--slate)" }}>
+                These papers could not be decrypted. Nothing was deleted; tap one for details.
+              </p>
+              <div className="paper-index" style={{ marginTop: 12 }}>
+                {locked.map((entry) => (
+                  <button key={entry.id} type="button" className="paper-row" onClick={() => onOpenPaper(entry.id)} style={{ width: "100%" }}>
+                    <span>
+                      <span className="paper-row-title">Locked paper</span>
+                      <span className="paper-row-meta" style={{ display: "block" }}>
+                        Updated {formatDateTime(entry.updatedAt)} —{" "}
+                        {entry.reason === "locked"
+                          ? "enter your passphrase to open it"
+                          : "it appears to have been altered and cannot be decrypted"}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </>
       )}
 
       {hasMore && searchResults === null ? (

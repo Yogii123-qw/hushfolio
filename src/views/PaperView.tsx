@@ -8,7 +8,8 @@ import { ConfirmDialog } from "../components/Modal";
 import { deletePaper, getPaper, updatePaper } from "../data/papers";
 import { splitTagField, validatePaperInput } from "../data/validation";
 import { AppError, toAppError } from "../errors";
-import type { ActionId, InferenceSourceValue, Paper } from "../types";
+import type { ActionId, InferenceSourceValue, LockedPaper, Paper } from "../types";
+import { isLockedPaper } from "../types";
 import { formatDateTime, formatDuration, photoFileToData, type PhotoFileData } from "../utils";
 
 interface PaperViewProps {
@@ -26,7 +27,7 @@ interface RunMeta {
 
 export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): JSX.Element {
   const { services, user, config } = ctx;
-  const [paper, setPaper] = useState<Paper | null>(null);
+  const [paper, setPaper] = useState<Paper | LockedPaper | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AppError | null>(null);
 
@@ -62,7 +63,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
     setLoading(true);
     setError(null);
     try {
-      const loaded = await getPaper(services.db, user.uid, paperId);
+      const loaded = await getPaper(services.db, user.uid, paperId, ctx.cryptoKey);
       if (!mountedRef.current) return;
       if (loaded === null) {
         setError(
@@ -81,7 +82,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [services.db, user.uid, paperId]);
+  }, [services.db, user.uid, paperId, ctx.cryptoKey]);
 
   useEffect(() => {
     void loadPaper();
@@ -97,7 +98,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
   };
 
   const startEdit = (): void => {
-    if (paper === null) return;
+    if (paper === null || isLockedPaper(paper)) return;
     setEditTitle(paper.title);
     setEditBody(paper.body);
     setEditTags(paper.tags.join(", "));
@@ -106,7 +107,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
   };
 
   const saveEdit = async (): Promise<void> => {
-    if (paper === null) return;
+    if (paper === null || isLockedPaper(paper)) return;
     const validated = validatePaperInput(
       { title: editTitle, body: editBody, tags: splitTagField(editTags) },
       config.maxPaperChars,
@@ -124,6 +125,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
         paper.id,
         { title: validated.value.title, body: validated.value.body, tags: validated.value.tags },
         config.maxPaperChars,
+        ctx.cryptoKey,
       );
       setEditing(false);
       await loadPaper();
@@ -146,7 +148,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
   };
 
   const runAction = async (action: ActionId, extra: { question?: string; image?: PhotoFileData } = {}): Promise<void> => {
-    if (paper === null || runningAction !== null) return;
+    if (paper === null || isLockedPaper(paper) || runningAction !== null) return;
     setRunningAction(action);
     setActionError(null);
     setSaveNote(null);
@@ -184,7 +186,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
   };
 
   const applySummary = async (): Promise<void> => {
-    if (paper === null || summaryResult === null) return;
+    if (paper === null || isLockedPaper(paper) || summaryResult === null) return;
     try {
       await updatePaper(
         services.db,
@@ -197,6 +199,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
           mood: summaryResult.data.mood,
         },
         config.maxPaperChars,
+        ctx.cryptoKey,
       );
       setSaveNote("Summary, title, tags, and mood saved to the paper.");
       await loadPaper();
@@ -206,7 +209,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
   };
 
   const saveSensitivity = async (): Promise<void> => {
-    if (paper === null || sealResult === null) return;
+    if (paper === null || isLockedPaper(paper) || sealResult === null) return;
     try {
       await updatePaper(
         services.db,
@@ -223,6 +226,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
           },
         },
         config.maxPaperChars,
+        ctx.cryptoKey,
       );
       setSaveNote("Seal Scan result saved to the paper.");
       await loadPaper();
@@ -232,7 +236,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
   };
 
   const savePhotoOutcome = async (): Promise<void> => {
-    if (paper === null || photoResult === null || photoFile === null) return;
+    if (paper === null || isLockedPaper(paper) || photoResult === null || photoFile === null) return;
     const appendedBody = `${paper.body}\n\n[Photo transcription — ${photoFile.name}]\n${photoResult.data.transcription}`;
     try {
       await updatePaper(
@@ -250,6 +254,7 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
           },
         },
         config.maxPaperChars,
+        ctx.cryptoKey,
       );
       setSaveNote("Transcription appended and photo details saved. The photo itself was not uploaded.");
       setPhotoFile(null);
@@ -287,6 +292,55 @@ export function PaperView({ ctx, paperId, onBack, onDeleted }: PaperViewProps): 
     return (
       <div>
         {error !== null ? <ErrorPanel error={error} onRetry={onBack} retryLabel="Back to papers" /> : null}
+      </div>
+    );
+  }
+
+  if (isLockedPaper(paper)) {
+    return (
+      <div>
+        <button type="button" className="button button-quiet" onClick={onBack}>
+          Back to papers
+        </button>
+        <article className="sheet">
+          <div className="sheet-inner">
+            <h1>{paper.reason === "locked" ? "This paper is locked" : "This paper cannot be decrypted"}</h1>
+            <p className="sheet-meta">Filed {formatDateTime(paper.createdAt)}. Updated {formatDateTime(paper.updatedAt)}.</p>
+            {paper.reason === "locked" ? (
+              <p>
+                The paper is sealed with your encryption passphrase, and the archive is locked on this
+                device. Enter your passphrase to open it. Nothing has been deleted.
+              </p>
+            ) : (
+              <p>
+                This paper appears to have been altered, or it was sealed with a different passphrase,
+                and it cannot be decrypted. Your other papers are unaffected, and nothing has been
+                deleted.
+              </p>
+            )}
+            <div className="sheet-actions">
+              {paper.reason === "locked" ? (
+                <button type="button" className="button button-primary" onClick={() => ctx.onLock()}>
+                  Enter passphrase
+                </button>
+              ) : (
+                <button type="button" className="button button-danger" onClick={() => setConfirmDelete(true)}>
+                  Delete paper
+                </button>
+              )}
+            </div>
+          </div>
+        </article>
+        {confirmDelete ? (
+          <ConfirmDialog
+            title="Delete this paper?"
+            body="The paper will be permanently deleted without ever being decrypted. Ledger entries about AI runs on this paper are kept, because they contain no paper content."
+            confirmLabel="Delete permanently"
+            destructive
+            onConfirm={() => void handleDelete()}
+            onCancel={() => setConfirmDelete(false)}
+          />
+        ) : null}
       </div>
     );
   }

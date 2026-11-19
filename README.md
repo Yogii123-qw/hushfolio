@@ -31,7 +31,7 @@ or outputs.
   plus `gemini-3.5-flash-lite` in the cloud. Structured output on both
   paths (cloud `responseSchema`, on-device `responseConstraint`),
   streaming, and multimodal input.
-- **App Check** (reCAPTCHA v3, with a documented debug-token flow for
+- **App Check** (reCAPTCHA Enterprise, with a documented debug-token flow for
   local development).
 - **Authentication** (anonymous by default, optional Google sign-in).
 - **Firestore** (papers + append-only ledger, owner-only security rules
@@ -47,6 +47,17 @@ part that needs an upgrade. When the project has no billing attached,
 cloud actions fail with a clear message saying a Blaze plan is required,
 and nothing is retried silently or misreported as a bug. To turn cloud AI
 on, upgrade the project to the Blaze plan in the Firebase console.
+
+**Encryption.** Every paper is encrypted on the device with AES-GCM before
+it reaches Firestore. The key comes from a passphrase (PBKDF2-SHA-256,
+200,000 iterations) and lives only in memory; the passphrase is never
+stored anywhere, and neither is the key. A per-user salt and an encrypted
+check value live in the user's own Firestore document so the same
+passphrase unlocks the archive on any device. Papers written before
+encryption are sealed automatically the first time they are read with the
+archive unlocked. If the passphrase is forgotten, the sealed papers cannot
+be recovered — there is no reset. Changing the passphrase is not supported
+yet.
 
 ## Setup
 

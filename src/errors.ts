@@ -2,6 +2,8 @@
 // original error code (when one exists), a plain-language message, and a
 // concrete next step. Nothing is ever swallowed into "something went wrong".
 
+import { CryptoError } from "./crypto";
+
 export type ErrorKind =
   | "config"
   | "auth"
@@ -11,6 +13,7 @@ export type ErrorKind =
   | "permission"
   | "validation"
   | "model_output"
+  | "locked"
   | "unknown";
 
 export class AppError extends Error {
@@ -49,6 +52,15 @@ function readCodeAndMessage(error: unknown): { code: string | null; message: str
 export function toAppError(error: unknown, context: string): AppError {
   if (error instanceof AppError) {
     return error;
+  }
+  // A decryption failure is an encryption-lock problem, never a network
+  // or unknown error: the paper is there, the key is wrong or missing.
+  if (error instanceof CryptoError) {
+    return new AppError(
+      "locked",
+      `${context}: ${error.message}`,
+      "Enter your encryption passphrase to unlock the archive. If the passphrase is wrong, the paper stays locked; nothing is deleted.",
+    );
   }
   const { code, message } = readCodeAndMessage(error);
   const haystack = `${code ?? ""} ${message}`.toLowerCase();

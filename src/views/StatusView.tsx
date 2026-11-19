@@ -36,7 +36,9 @@ export function StatusView({ ctx }: { ctx: AppContext }): JSX.Element {
   useEffect(() => {
     void (async () => {
       try {
-        await listPapersPage(services.db, user.uid, 1, null);
+        // No key on purpose: this is a connectivity probe only. A locked
+        // result still proves Firestore is reachable.
+        await listPapersPage(services.db, user.uid, 1, null, null);
         if (mountedRef.current) setFirestoreState("reachable");
       } catch (probeError) {
         if (!mountedRef.current) return;

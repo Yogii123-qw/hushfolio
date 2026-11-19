@@ -25,10 +25,14 @@ export interface AppContext {
   deviceProbe: DeviceProbeResult;
   strictMode: boolean;
   online: boolean;
+  /** The in-memory encryption key; null while the archive is locked. */
+  cryptoKey: CryptoKey | null;
   onStrictModeChange: (value: boolean) => void;
   onRefreshDeviceProbe: () => void;
   onNavigate: (view: ViewId) => void;
   onOpenPaper: (paperId: string) => void;
   onSignOut: () => void;
+  /** Forget the key in memory and return to the unlock screen. */
+  onLock: () => void;
   recordLedger: (entry: LedgerRecordInput) => Promise<void>;
 }

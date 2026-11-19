@@ -5,6 +5,8 @@ import type { AppContext, ConfigMeta, ViewId } from "./appContext";
 import { Drawer } from "./components/Drawer";
 import { ErrorPanel } from "./components/feedback";
 import { SealIcon } from "./components/icons";
+import { getCurrentKey } from "./crypto";
+import { loadEncryptionState, lockEncryption } from "./data/encryption";
 import { recordLedgerRun } from "./data/ledger";
 import { AppError, toAppError } from "./errors";
 import { readAppCheckOptions, type AppCheckStatus } from "./platform/appcheck";
@@ -21,6 +23,7 @@ import { SettingsView } from "./views/SettingsView";
 import { SetupView } from "./views/SetupView";
 import { SignInView } from "./views/SignInView";
 import { StatusView } from "./views/StatusView";
+import { UnlockView } from "./views/UnlockView";
 
 type BootState =
   | { phase: "booting" }
@@ -95,6 +98,8 @@ export function App(): JSX.Element {
   });
   const [strictOverride, setStrictOverride] = useState<boolean | null>(null);
   const [online, setOnline] = useState<boolean>(() => navigator.onLine);
+  const [cryptoKey, setCryptoKey] = useState<CryptoKey | null>(null);
+  const [encState, setEncState] = useState<"checking" | "setup" | "unlock" | "ready">("checking");
   const [view, setView] = useState<ViewId>("papers");
   const [openPaperId, setOpenPaperId] = useState<string | null>(null);
   const [composing, setComposing] = useState(false);
@@ -154,6 +159,40 @@ export function App(): JSX.Element {
     });
     return unsubscribe;
   }, [boot]);
+
+  // Encryption gate: after sign-in, the archive opens only once the
+  // passphrase is set (first run) or entered (returning user). The key
+  // lives in memory; signing out forgets it.
+  useEffect(() => {
+    if (boot.phase !== "ready") return;
+    if (user === null) {
+      lockEncryption();
+      setCryptoKey(null);
+      setEncState("checking");
+      return;
+    }
+    if (getCurrentKey(user.uid) !== null) {
+      setCryptoKey(getCurrentKey(user.uid));
+      setEncState("ready");
+      return;
+    }
+    let cancelled = false;
+    setEncState("checking");
+    void (async () => {
+      try {
+        const state = await loadEncryptionState(boot.services.db, user.uid);
+        if (cancelled) return;
+        setEncState(state.salt === null ? "setup" : "unlock");
+      } catch {
+        // A failed state read must not strand the user: fall back to the
+        // unlock screen, which retries the read on submit.
+        if (!cancelled) setEncState("unlock");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [boot, user]);
 
   useEffect(() => {
     const goOnline = (): void => setOnline(true);
@@ -240,6 +279,24 @@ export function App(): JSX.Element {
     );
   }
 
+  if (encState === "checking") {
+    return <BootScreen label="Checking encryption…" />;
+  }
+
+  if (encState !== "ready") {
+    return (
+      <UnlockView
+        mode={encState}
+        services={boot.services}
+        user={user}
+        onUnlocked={(key) => {
+          setCryptoKey(key);
+          setEncState("ready");
+        }}
+      />
+    );
+  }
+
   const strictMode = strictOverride ?? boot.config.strictModeDefault;
   const recordLedger = async (entry: LedgerRecordInput): Promise<void> => {
     await recordLedgerRun(boot.services.db, user.uid, entry);
@@ -254,6 +311,7 @@ export function App(): JSX.Element {
     deviceProbe,
     strictMode,
     online,
+    cryptoKey,
     onStrictModeChange: (value) => setStrictOverride(value),
     onRefreshDeviceProbe: refreshDeviceProbe,
     onNavigate: navigate,
@@ -262,6 +320,14 @@ export function App(): JSX.Element {
       setView("papers");
       setOpenPaperId(null);
       setComposing(false);
+    },
+    onLock: () => {
+      lockEncryption();
+      setCryptoKey(null);
+      setView("papers");
+      setOpenPaperId(null);
+      setComposing(false);
+      setEncState("unlock");
     },
     recordLedger,
   };

@@ -1,7 +1,7 @@
 # Hushfolio — STATE
 
-## Current phase: GitHub Pages hosting LIVE (item 1 of 3 $0 improvements done), encryption next
-Updated 19 Nov 2026 ~18:19 WIB.
+## Current phase: Real encryption done (item 2 of 3 $0 improvements), Firestore rules deploy + live verification next
+Updated 19 Nov 2026 ~18:40 WIB.
 
 ## Done
 - Build complete (19 Nov 00:56 WIB): 159/159 tests, production build
@@ -69,6 +69,23 @@ Updated 19 Nov 2026 ~18:19 WIB.
   exchange 200, Vertex 403 (not 401), friendly Blaze panel verbatim,
   ledger records the failure, no request to domain root /, all
   requests HTTPS, 0 page errors. No service worker in src/.
+- Real encryption (19 Nov ~18:40 WIB, item 2 of 3 $0 improvements):
+  WebCrypto AES-GCM, PBKDF2-SHA-256 200,000 iterations, 256-bit
+  non-extractable key; one per-user salt + encrypted check value in
+  users/{uid}; key in memory only, cleared on sign-out / Lock.
+  Papers are encrypted on-device before Firestore (single
+  `encryptedBlob`, `v1.<iv>.<cipher>`); legacy plaintext papers are
+  sealed lazily on first read with a key (timestamps preserved, no
+  reorder). Passphrase setup / unlock gate after sign-in; wrong
+  passphrase and tampered blobs show honest locked/corrupt states,
+  never silent drops. Tests 188/188 (162 original + 15 crypto + 11
+  papers), build passes, Groq final review: APPROVE (after fixing a
+  REJECT: rules now encrypted-only, legacy fields forbidden beside the
+  blob, mixed-doc migration no longer overwrites the blob). Firestore
+  rules updated in the repo (firestore.rules) — MUST be published via
+  the console before live verification, or encrypted writes fail.
+  Blueprint: audit-buildhybridai/ENCRYPTION-BLUEPRINT.md. Known gap:
+  changing the passphrase is not supported yet (Settings says so).
 
 ## Advisor consultations (SOP protocol)
 - 19 Nov ~15:45 WIB, Groq gpt-oss-120b: "Will ReCaptchaV3Provider work
@@ -95,15 +112,44 @@ Updated 19 Nov 2026 ~18:19 WIB.
   Verdict: APPROVE. Evidence first: build passes, dist paths are
   /hushfolio/*, no react-router, no absolute paths in src/, dist
   gitignored, tests 162/162, no secrets in the diff.
+- 19 Nov ~18:25 WIB, Groq gpt-oss-120b (3 calls, blueprint): encryption
+  design — src/crypto.ts (PBKDF2 200k, AES-GCM, v1 blob), data-layer
+  hooks (blob holds title/body/tags/summary/sensitivity/mood; plaintext
+  createdAt/updatedAt/photo metadata), salt + check in users/{uid},
+  mandatory passphrase setup/unlock, lazy migration, honest failure
+  modes, test list. Two implementer corrections recorded in
+  ENCRYPTION-BLUEPRINT.md: salt NOT inside the blob (per-user salt
+  wins); updatePaper must re-encrypt the WHOLE field set, not the patch
+  (encrypting only the patch would drop the other fields).
+- 19 Nov ~18:33 WIB, Groq gpt-oss-120b (2 calls, final review):
+  Review 1 (crypto core): APPROVE, 5 minor findings (base64 concat
+  O(n²) — fixed with array+join; empty-string decode edge — already
+  caught by length checks; key zeroisation — impossible for opaque
+  WebCrypto handles; known-plaintext check value — the GCM tag is the
+  oracle either way, PBKDF2 + passphrase strength is the mitigation).
+  Review 2 (data layer + rules): REJECT — rules still allowed plaintext
+  writes (validPaper OR branch) and did not forbid legacy fields beside
+  the blob; migration silently skipped malformed docs; isLegacyDoc
+  masked mixed docs. All fixed (rules encrypted-only + legacy fields
+  forbidden, migration logs malformed skips, isLegacyDoc true for any
+  leftover plaintext field). Re-review: APPROVE. Micro-review of the
+  last fix (mixed-doc migration must not overwrite the blob):
+  APPROVE.
 
 ## In progress
-- Item 2 of 3 $0 improvements (owner order 18:10 WIB): real
-  encryption (WebCrypto AES-GCM, PBKDF2 passphrase key). Groq
-  consultation first (SOP), then implementation.
+- Item 2 close-out (owner order 18:10 WIB): publish the new Firestore
+  rules via the console (browser task, brunosrna44@gmail.com), then
+  redeploy gh-pages with the new build, then live-verify encryption
+  from the Pages origin (passphrase setup → create → Firestore doc has
+  only encryptedBlob → reload + unlock → readable → wrong passphrase
+  rejected → legacy plaintext paper migrates on read). Deploy order
+  matters: rules first (old rules reject encrypted writes), gh-pages
+  immediately after (new rules reject the old build's plaintext writes;
+  reads keep working either way).
 - Item 3: fresh Firebase project test (staged; stop at stage 1 if 403).
 - Demo video on HOLD until all three items are done (video must be
-  recorded from the final build). Full audit:
-  ~/workspace/hackathons/pt11/audit-buildhybridai/
+  recorded from the final build, and the script gains a passphrase step).
+  Full audit: ~/workspace/hackathons/pt11/audit-buildhybridai/
   LIVE-VERIFICATION-2026-11-19.md.
 
 ## Remaining owner gates
@@ -111,3 +157,5 @@ Updated 19 Nov 2026 ~18:19 WIB.
 - Devpost submit before Tue 1 Dec 2026 05:00 WIB.
 - Cloud AI stays off on the Spark plan: cloud actions fail with the
   friendly Blaze message until the owner enables billing.
+- Changing the encryption passphrase is not supported yet (known gap,
+  stated in Settings).
