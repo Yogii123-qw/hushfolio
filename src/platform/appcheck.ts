@@ -1,6 +1,11 @@
 // Firebase App Check setup.
 //
-// Production: reCAPTCHA v3 provider with the site key from the environment.
+// Production: reCAPTCHA Enterprise provider with the site key from the
+// environment. The key is registered in the Firebase console under the
+// Fraud Defense (reCAPTCHA Enterprise) provider, so the SDK must use
+// ReCaptchaEnterpriseProvider: a classic ReCaptchaV3Provider token is not
+// accepted for an Enterprise-registered app, and AI Logic calls would be
+// rejected while enforcement is on.
 // Local development: when VITE_APPCHECK_DEBUG=true, the debug token global
 // is set BEFORE initializeAppCheck, exactly as the official AI Logic
 // get-started guide prescribes. The debug token printed in the browser
@@ -8,7 +13,7 @@
 // No site key: App Check is skipped and the Status view says so honestly;
 // cloud calls may then fail when enforcement is on.
 
-import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from "firebase/app-check";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, type AppCheck } from "firebase/app-check";
 import type { FirebaseApp } from "firebase/app";
 import { logInfo, logWarn } from "./logging";
 
@@ -50,12 +55,12 @@ export function initAppCheckForApp(app: FirebaseApp, options: AppCheckOptions): 
     return {
       mode: "skipped",
       detail:
-        "No reCAPTCHA v3 site key is configured (VITE_APPCHECK_SITE_KEY). " +
+        "No reCAPTCHA Enterprise site key is configured (VITE_APPCHECK_SITE_KEY). " +
         "App Check is not active; cloud AI calls may be rejected while App Check enforcement is on.",
     };
   }
   initialized = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(options.siteKey),
+    provider: new ReCaptchaEnterpriseProvider(options.siteKey),
     isTokenAutoRefreshEnabled: true,
   });
   if (options.debug) {
@@ -70,6 +75,6 @@ export function initAppCheckForApp(app: FirebaseApp, options: AppCheckOptions): 
   logInfo("appcheck_initialized", { mode: "recaptcha" });
   return {
     mode: "recaptcha",
-    detail: "App Check is active with the reCAPTCHA v3 provider.",
+    detail: "App Check is active with the reCAPTCHA Enterprise provider.",
   };
 }

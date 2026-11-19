@@ -72,30 +72,51 @@ instructions; with one, every AI call is a real Firebase AI Logic call.
 - UI audits on real renders: `ux_self_critique` pass + `ai_slop_audit`
   scored audit 20/20 after fixes (focus trap, tokenized colors, persistent
   compose draft, styled file picker, sentence-form metadata).
-- Secret grep audit: no keys, tokens, or PII in tracked files.
-- `git remote -v`: EMPTY (local repo only, no push).
+- App Check provider fix (19 Nov 2026): `ReCaptchaEnterpriseProvider`
+  (Groq-confirmed); typecheck clean, tests still 159/159, build passes.
+- `git remote -v`: github.com/Yogii123-qw/hushfolio, pushed public
+  19 Nov 2026 07:09 WIB; local commits after the push not yet pushed.
 
 ## Honest limits (what was NOT verified live)
 
 Live on-device inference, live cloud inference and fallback, and live
-Firestore/Auth/App Check/Remote Config round-trips were NOT verified:
-they need a real Firebase project and Chrome with the on-device model,
-which only the owner can provide. The routing, parsing, streaming, and
-ledger logic is covered by 159 tests including SDK-boundary doubles, but
-a test double is not a live model. The first live run must be done by the
-owner (or with the owner's project) before the demo video is recorded.
+Firestore/Auth/App Check/Remote Config round-trips are STILL NOT
+verified. The Firebase project now exists (gate 1 done), but the
+verification VM's headless Chromium cannot reach Google APIs (egress
+proxy tunnel failure), and live on-device inference needs Chrome with
+the Gemini Nano model. The routing, parsing, streaming, and ledger
+logic is covered by 159 tests including SDK-boundary doubles, but a
+test double is not a live model. Live verification is in progress in
+the "Uji Hushfolio" test chat and must finish before the demo video
+is recorded.
 
 ## Owner gates (decisions + accounts only the owner can provide)
 
-1. **Firebase project**: create the project, enable AI Logic (Gemini
-   Developer API), Auth (Anonymous + Google), Firestore (publish
-   `firestore.rules`), App Check (reCAPTCHA v3 or debug token), and
-   Remote Config values; fill in `.env` from `.env.example`.
-2. **Live verification run**: sign in, download the on-device model from
-   Status, run all five actions, confirm the ledger labels sources
-   correctly.
-3. **Public repo**: push this repo to a public GitHub repository under an
-   open-source licence (Apache-2.0 already in place).
+1. **Firebase project**: DONE 19 Nov 2026 (browser task, account
+   brunosrna44@gmail.com, free Spark plan, no card). Project
+   "Hushfolio", ID `hushfolio-133fb`, no Analytics. Gemini Developer
+   API enabled (Vertex AI NOT enabled). AI Logic enabled with the
+   Gemini Developer API backend. Auth Anonymous + Google enabled.
+   Firestore production mode in asia-southeast1, `firestore.rules`
+   published 15:32 WIB. Web app "Hushfolio web" registered. App Check
+   reCAPTCHA Enterprise key registered (Fraud Defense provider; the
+   console marks Classic deprecated). Remote Config Version 1
+   published with all 8 parameters. `.env` filled locally from the
+   reported config and verified ignored by git (never committed).
+   App Check note: the app code uses `ReCaptchaEnterpriseProvider`
+   (fixed 19 Nov, Groq-confirmed); a classic v3 token is not accepted
+   for an Enterprise-registered app, and AI Logic enforcement is on.
+2. **Live verification run**: IN PROGRESS in the "Uji Hushfolio" test
+   chat. Sign in, download the on-device model from Status, run all
+   five actions, confirm the ledger labels sources correctly. Known
+   blocker: headless Chromium on the verification VM cannot reach
+   Google APIs (egress-proxy tunnel failure; curl works), so the
+   in-browser sign-in/cloud path is unverified there; the test chat
+   tries Firefox first, then REST-API verification.
+3. **Public repo**: DONE 19 Nov 2026 07:09 WIB — pushed public to
+   github.com/Yogii123-qw/hushfolio (Apache-2.0). Local commits after
+   the push (em-dash cleanup, doc fixes, App Check Enterprise fix)
+   are not yet pushed; a push needs the owner's word.
 4. **Demo video**: record a ≤ 3-minute demo, public on YouTube, in
    English or English-subtitled.
 5. **Hosting (optional but strongly encouraged)**: deploy the production

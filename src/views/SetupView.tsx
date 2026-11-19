@@ -47,7 +47,7 @@ export function SetupView({ missingKeys }: { missingKeys: string[] }): JSX.Eleme
             <code>firestore.rules</code> from this repository.
           </li>
           <li>
-            In <strong>App Check</strong>, register the app with a reCAPTCHA v3 site key. For local
+            In <strong>App Check</strong>, register the app with a reCAPTCHA Enterprise site key. For local
             development, set <code>VITE_APPCHECK_DEBUG=true</code> and register the debug token
             printed in the browser console.
           </li>

@@ -77,7 +77,7 @@ export function StatusView({ ctx }: { ctx: AppContext }): JSX.Element {
     },
     {
       name: "App Check",
-      value: `${appCheck.mode === "recaptcha" ? "Active (reCAPTCHA v3)" : appCheck.mode === "debug" ? "Debug mode" : "Not active"} — ${appCheck.detail}`,
+      value: `${appCheck.mode === "recaptcha" ? "Active (reCAPTCHA Enterprise)" : appCheck.mode === "debug" ? "Debug mode" : "Not active"} — ${appCheck.detail}`,
     },
     {
       name: "Firestore",
