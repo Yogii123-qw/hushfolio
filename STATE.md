@@ -59,13 +59,8 @@ Updated 19 Nov 2026 ~17:45 WIB.
   use ReCaptchaEnterpriseProvider; classic v3 tokens are not accepted
   for an Enterprise-registered app. Own conclusion agreed (option a);
   no conflict. Decision taken with that evidence.
-- 19 Nov ~15:15 WIB, Groq gpt-oss-120b: Firebase setup checklist
-  confirmed with tweaks (Firestore location immutable, enable Gemini
-  Developer API first, Auth needs OAuth consent + authorized domains,
-  publish rules before reads/writes, App Check enforcement only after
-  local key verification). One Groq suggestion REJECTED with evidence:
-  enable Vertex AI (Hushfolio uses the Gemini Developer API backend;
-  Vertex AI is unnecessary).
+- 19 Nov ~17:52 WIB, Groq gpt-oss-120b: "403 free tier not available — known causes and any $0 fix?" Conclusion: most likely cause is no billing account attached (Spark project has no billing relationship; free tier is billing-enabled free quota); project-level, so a fresh Spark project under the same account will hit the same 403; only fix is attaching a billing account (even trial credit), staying in free quota costs $0 but needs a card. Own conclusion: backend already GoogleAIBackend (verified in src/platform/firebase.ts), so the backend-misconfiguration hypothesis is dead; Groq's billing-account explanation is consistent with the observed 403. No conflict. Decision: present $0 menu to Monch (GitHub Pages hosting, fresh-project test as long shot, WebCrypto encryption as new feature).
+- Direct-API check 19 Nov 17:58 WIB (curl, key read from .env into a shell variable, never printed): generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent → HTTP 403 PERMISSION_DENIED / ACCESS_DENIED. The block is NOT Firebase-AI-Logic-specific; it is project/key-level. Fresh-project odds now lower. Ranking confirmed by both Groq and this test: hosting (A) > encryption (C) > fresh project (B).
 - 19 Nov 17:2x WIB, Groq gpt-oss-120b: confirmed the App Check
   init-order mechanism exactly (getAI captures the App Check instance
   once; fix is to initialize App Check before getAI()).
